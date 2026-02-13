@@ -6,34 +6,61 @@ class User(db.Model):
     __tablename__ = 'users'
     
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    password_hash = db.Column(db.String(200), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    username = db.Column(db.String(80), unique=True, nullable=False, index=True)
+    password_hash = db.Column(db.String(256), nullable=False)
     first_name = db.Column(db.String(100), nullable=False)
     last_name = db.Column(db.String(100), nullable=False)
     role = db.Column(db.String(20), nullable=False, default='patient')  # admin, doctor, patient
     is_active = db.Column(db.Boolean, default=True)
+    is_email_verified = db.Column(db.Boolean, default=False)
+    last_login = db.Column(db.DateTime)
+    
+    # Timestamps
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
-    doctor_profile = db.relationship('Doctor', backref='user', uselist=False, lazy=True)
-    patient_profile = db.relationship('Patient', backref='user', uselist=False, lazy=True)
+    doctor_profile = db.relationship('Doctor', backref='user', uselist=False, cascade='all, delete-orphan')
+    patient_profile = db.relationship('Patient', backref='user', uselist=False, cascade='all, delete-orphan')
+    
+    # Audit logs (if you want to track user actions)
+    audit_logs = db.relationship('AuditLog', backref='user', lazy='dynamic', cascade='all, delete-orphan')
     
     def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
+        """Create hashed password"""
+        self.password_hash = generate_password_hash(password, method='pbkdf2:sha256')
     
     def check_password(self, password):
+        """Check hashed password"""
         return check_password_hash(self.password_hash, password)
     
+    def update_last_login(self):
+        """Update last login timestamp"""
+        self.last_login = datetime.utcnow()
+        db.session.commit()
+    
+    @property
+    def full_name(self):
+        """Get full name"""
+        return f"{self.first_name} {self.last_name}"
+    
     def to_dict(self):
+        """Convert to dictionary"""
         return {
             'id': self.id,
             'email': self.email,
             'username': self.username,
             'first_name': self.first_name,
             'last_name': self.last_name,
+            'full_name': self.full_name,
             'role': self.role,
             'is_active': self.is_active,
-            'created_at': self.created_at.isoformat() if self.created_at else None
+            'is_email_verified': self.is_email_verified,
+            'last_login': self.last_login.isoformat() if self.last_login else None,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
+    
+    def __repr__(self):
+        return f'<User {self.username} - {self.role}>'
