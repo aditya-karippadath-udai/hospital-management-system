@@ -1,8 +1,10 @@
-from app import db
+from app.extensions import db
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import JSON
 
+
 class Doctor(db.Model):
+    """Doctor model for medical professionals"""
     __tablename__ = 'doctors'
     
     id = db.Column(db.Integer, primary_key=True)
@@ -15,17 +17,17 @@ class Doctor(db.Model):
     experience_years = db.Column(db.Integer, default=0)
     consultation_fee = db.Column(db.Numeric(10, 2), default=0.00)
     bio = db.Column(db.Text)
-    education = db.Column(JSON)  # Store education history as JSON
-    certifications = db.Column(JSON)  # Store certifications as JSON
+    education = db.Column(JSON)
+    certifications = db.Column(JSON)
     
     # Availability
-    available_days = db.Column(JSON, default=list)  # ["Monday", "Wednesday", "Friday"]
+    available_days = db.Column(JSON, default=list)
     available_time_start = db.Column(db.Time)
     available_time_end = db.Column(db.Time)
-    slot_duration = db.Column(db.Integer, default=30)  # minutes per appointment slot
+    slot_duration = db.Column(db.Integer, default=30)
     is_available = db.Column(db.Boolean, default=True)
     
-    # Contact Information (if different from user)
+    # Contact Information
     clinic_address = db.Column(db.Text)
     clinic_phone = db.Column(db.String(20))
     clinic_email = db.Column(db.String(120))
@@ -53,42 +55,6 @@ class Doctor(db.Model):
     def total_appointments(self):
         """Get total appointments count"""
         return self.appointments.count()
-    
-    @property
-    def upcoming_appointments(self):
-        """Get upcoming appointments"""
-        from datetime import date
-        return self.appointments.filter(
-            Appointment.appointment_date >= date.today(),
-            Appointment.status == 'scheduled'
-        ).count()
-    
-    def is_available_on(self, date, time):
-        """Check if doctor is available on specific date and time"""
-        from sqlalchemy import and_
-        
-        # Check if doctor has leave on this date
-        leave = self.leaves.filter(
-            and_(
-                DoctorLeave.start_date <= date,
-                DoctorLeave.end_date >= date
-            )
-        ).first()
-        
-        if leave:
-            return False
-        
-        # Check if day is in available days
-        day_name = date.strftime('%A')
-        if day_name not in (self.available_days or []):
-            return False
-        
-        # Check if time is within working hours
-        if self.available_time_start and self.available_time_end:
-            if time < self.available_time_start or time >= self.available_time_end:
-                return False
-        
-        return True
     
     def to_dict(self):
         """Convert to dictionary"""
@@ -158,13 +124,12 @@ class DoctorRating(db.Model):
     patient_id = db.Column(db.Integer, db.ForeignKey('patients.id', ondelete='CASCADE'), nullable=False)
     appointment_id = db.Column(db.Integer, db.ForeignKey('appointments.id', ondelete='SET NULL'), nullable=True)
     
-    rating = db.Column(db.Integer, nullable=False)  # 1-5
+    rating = db.Column(db.Integer, nullable=False)
     review = db.Column(db.Text)
     
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # Ensure one rating per appointment
     __table_args__ = (db.UniqueConstraint('appointment_id', name='unique_appointment_rating'),)
     
     def to_dict(self):

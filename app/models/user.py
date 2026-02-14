@@ -1,8 +1,10 @@
-from app import db
+from app.extensions import db
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
+
 class User(db.Model):
+    """User model for authentication and authorization"""
     __tablename__ = 'users'
     
     id = db.Column(db.Integer, primary_key=True)
@@ -24,9 +26,6 @@ class User(db.Model):
     doctor_profile = db.relationship('Doctor', backref='user', uselist=False, cascade='all, delete-orphan')
     patient_profile = db.relationship('Patient', backref='user', uselist=False, cascade='all, delete-orphan')
     
-    # Audit logs (if you want to track user actions)
-    audit_logs = db.relationship('AuditLog', backref='user', lazy='dynamic', cascade='all, delete-orphan')
-    
     def set_password(self, password):
         """Create hashed password"""
         self.password_hash = generate_password_hash(password, method='pbkdf2:sha256')
@@ -34,11 +33,6 @@ class User(db.Model):
     def check_password(self, password):
         """Check hashed password"""
         return check_password_hash(self.password_hash, password)
-    
-    def update_last_login(self):
-        """Update last login timestamp"""
-        self.last_login = datetime.utcnow()
-        db.session.commit()
     
     @property
     def full_name(self):

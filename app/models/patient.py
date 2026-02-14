@@ -1,8 +1,10 @@
-from app import db
+from app.extensions import db
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import JSON
 
+
 class Patient(db.Model):
+    """Patient model for hospital patients"""
     __tablename__ = 'patients'
     
     id = db.Column(db.Integer, primary_key=True)
@@ -28,14 +30,13 @@ class Patient(db.Model):
     emergency_contact_relation = db.Column(db.String(50))
     
     # Medical Information
-    blood_group = db.Column(db.String(5))
-    height = db.Column(db.Float)  # in cm
-    weight = db.Column(db.Float)  # in kg
-    allergies = db.Column(JSON, default=list)  # Store allergies as JSON array
-    chronic_diseases = db.Column(JSON, default=list)  # Store chronic diseases as JSON array
-    current_medications = db.Column(JSON, default=list)  # Store current medications as JSON array
-    medical_history = db.Column(JSON, default=dict)  # Store medical history as JSON
-    family_history = db.Column(JSON, default=dict)  # Store family history as JSON
+    height = db.Column(db.Float)
+    weight = db.Column(db.Float)
+    allergies = db.Column(JSON, default=list)
+    chronic_diseases = db.Column(JSON, default=list)
+    current_medications = db.Column(JSON, default=list)
+    medical_history = db.Column(JSON, default=dict)
+    family_history = db.Column(JSON, default=dict)
     
     # Insurance Information
     insurance_provider = db.Column(db.String(100))
@@ -44,7 +45,7 @@ class Patient(db.Model):
     
     # Preferences
     preferred_language = db.Column(db.String(50), default='English')
-    communication_preference = db.Column(db.String(20), default='email')  # email, sms, phone
+    communication_preference = db.Column(db.String(20), default='email')
     
     # Timestamps
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -53,8 +54,7 @@ class Patient(db.Model):
     # Relationships
     appointments = db.relationship('Appointment', backref='patient', lazy='dynamic', cascade='all, delete-orphan')
     prescriptions = db.relationship('Prescription', backref='patient', lazy='dynamic', cascade='all, delete-orphan')
-    medical_records = db.relationship('MedicalRecord', backref='patient', lazy='dynamic', cascade='all, delete-orphan')
-    bills = db.relationship('Bill', backref='patient', lazy='dynamic', cascade='all, delete-orphan')
+    ratings = db.relationship('DoctorRating', backref='patient', lazy='dynamic', cascade='all, delete-orphan')
     
     @property
     def age(self):

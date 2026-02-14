@@ -1,8 +1,10 @@
-from app import db
+from app.extensions import db
 from datetime import datetime
 from sqlalchemy import Index
 
+
 class Appointment(db.Model):
+    """Appointment model for patient-doctor appointments"""
     __tablename__ = 'appointments'
     
     id = db.Column(db.Integer, primary_key=True)
@@ -15,11 +17,11 @@ class Appointment(db.Model):
     # Appointment Details
     appointment_date = db.Column(db.Date, nullable=False)
     appointment_time = db.Column(db.Time, nullable=False)
-    end_time = db.Column(db.Time)  # Calculated based on slot duration
-    duration = db.Column(db.Integer, default=30)  # minutes
+    end_time = db.Column(db.Time)
+    duration = db.Column(db.Integer, default=30)
     
     # Status
-    status = db.Column(db.String(20), default='scheduled', index=True)  # scheduled, confirmed, completed, cancelled, no-show, rescheduled
+    status = db.Column(db.String(20), default='scheduled', index=True)
     cancellation_reason = db.Column(db.String(200))
     rescheduled_from = db.Column(db.Integer, db.ForeignKey('appointments.id'), nullable=True)
     
@@ -30,11 +32,11 @@ class Appointment(db.Model):
     diagnosis = db.Column(db.Text)
     
     # Type
-    appointment_type = db.Column(db.String(20), default='regular')  # regular, follow-up, emergency, consultation
+    appointment_type = db.Column(db.String(20), default='regular')
     
     # Payment
     consultation_fee = db.Column(db.Numeric(10, 2))
-    payment_status = db.Column(db.String(20), default='pending')  # pending, paid, refunded
+    payment_status = db.Column(db.String(20), default='pending')
     payment_method = db.Column(db.String(50))
     
     # Reminders
@@ -53,7 +55,7 @@ class Appointment(db.Model):
     rating = db.relationship('DoctorRating', backref='appointment', uselist=False, cascade='all, delete-orphan')
     rescheduled_to = db.relationship('Appointment', backref=db.backref('original_appointment', remote_side=[id]))
     
-    # Indexes for faster queries
+    # Indexes
     __table_args__ = (
         Index('idx_appointment_doctor_date', 'doctor_id', 'appointment_date'),
         Index('idx_appointment_patient_date', 'patient_id', 'appointment_date'),
@@ -88,7 +90,6 @@ class Appointment(db.Model):
         if self.status not in ['scheduled', 'confirmed']:
             return False
         
-        # Can cancel up to 2 hours before appointment
         if self.is_upcoming:
             appointment_datetime = datetime.combine(self.appointment_date, self.appointment_time)
             time_diff = (appointment_datetime - datetime.now()).total_seconds() / 3600

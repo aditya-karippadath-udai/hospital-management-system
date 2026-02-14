@@ -1,8 +1,10 @@
-from app import db
+from app.extensions import db
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import JSON
 
+
 class Prescription(db.Model):
+    """Prescription model for medical prescriptions"""
     __tablename__ = 'prescriptions'
     
     id = db.Column(db.Integer, primary_key=True)
@@ -18,14 +20,14 @@ class Prescription(db.Model):
     symptoms = db.Column(db.Text)
     clinical_notes = db.Column(db.Text)
     
-    # Medicines (JSON structure)
-    medicines = db.Column(JSON, nullable=False, default=list)  # [{"name": "Medicine", "dosage": "1x/day", "duration": "7 days", "instructions": "After food", "quantity": 10}]
+    # Medicines
+    medicines = db.Column(JSON, nullable=False, default=list)
     
-    # Tests (JSON structure)
-    tests = db.Column(JSON, default=list)  # [{"name": "Blood Test", "instructions": "Fasting", "lab": "Any"}]
+    # Tests
+    tests = db.Column(JSON, default=list)
     
     # Vital Signs
-    vital_signs = db.Column(JSON, default=dict)  # {"blood_pressure": "120/80", "heart_rate": 72, "temperature": 98.6, "respiratory_rate": 16, "oxygen_saturation": 98}
+    vital_signs = db.Column(JSON, default=dict)
     
     # Follow-up
     follow_up_date = db.Column(db.Date)
@@ -39,7 +41,7 @@ class Prescription(db.Model):
     # Digital Signature
     is_signed = db.Column(db.Boolean, default=False)
     signed_at = db.Column(db.DateTime)
-    digital_signature = db.Column(db.Text)  # Store signature hash or reference
+    digital_signature = db.Column(db.Text)
     
     # Status
     is_active = db.Column(db.Boolean, default=True)
@@ -65,13 +67,6 @@ class Prescription(db.Model):
         super().__init__(**kwargs)
         if not self.prescription_number:
             self.prescription_number = self.generate_prescription_number()
-    
-    def sign(self, signature):
-        """Sign the prescription"""
-        self.is_signed = True
-        self.signed_at = datetime.utcnow()
-        self.digital_signature = signature
-        db.session.commit()
     
     def to_dict(self):
         """Convert to dictionary"""
@@ -118,7 +113,7 @@ class Prescription(db.Model):
 
 
 class PrescriptionItem(db.Model):
-    """Model for individual prescription items (alternative to JSON storage)"""
+    """Model for individual prescription items"""
     __tablename__ = 'prescription_items'
     
     id = db.Column(db.Integer, primary_key=True)
@@ -126,14 +121,14 @@ class PrescriptionItem(db.Model):
     
     # Medicine Details
     medicine_name = db.Column(db.String(200), nullable=False)
-    medicine_type = db.Column(db.String(50))  # tablet, syrup, injection, etc.
+    medicine_type = db.Column(db.String(50))
     dosage = db.Column(db.String(100))
-    frequency = db.Column(db.String(100))  # times per day
+    frequency = db.Column(db.String(100))
     duration = db.Column(db.String(50))
     duration_days = db.Column(db.Integer)
     quantity = db.Column(db.Integer)
     instructions = db.Column(db.Text)
-    timing = db.Column(JSON, default=list)  # ["morning", "afternoon", "evening", "night"]
+    timing = db.Column(JSON, default=list)
     with_food = db.Column(db.Boolean, default=True)
     
     # Additional

@@ -1,43 +1,70 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_jwt_extended import JWTManager
+from flask import Flask, jsonify, request, render_template, redirect, url_for
+from app.extensions import db, migrate, jwt
 from dotenv import load_dotenv
 import os
 
 # Load environment variables
 load_dotenv()
 
-# Initialize extensions
-db = SQLAlchemy()
-migrate = Migrate()
-jwt = JWTManager()
-
-def create_app(config_class=None):
+def create_app(config_name=None):
+    """Application factory pattern"""
     app = Flask(__name__)
     
     # Load configuration
-    if config_class:
-        app.config.from_object(config_class)
-    else:
-        app.config.from_object('app.config.Config')
+    if config_name is None:
+        config_name = os.getenv('FLASK_ENV', 'development')
+    
+    from app.config import config
+    app.config.from_object(config.get(config_name, config['default']))
     
     # Initialize extensions with app
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
     
+    # Import models to ensure they are registered with SQLAlchemy
+    from app import models
+    
     # Register blueprints
+    register_blueprints(app)
+    
+    # Register error handlers
+    register_error_handlers(app)
+    
+    # Add root redirect
+    @app.route('/')
+    def index():
+        return redirect(url_for('auth.home'))
+    
+    return app
+
+
+def register_blueprints(app):
+    """Register all blueprints"""
     from app.routes.auth_routes import auth_bp
     from app.routes.admin_routes import admin_bp
     from app.routes.doctor_routes import doctor_bp
     from app.routes.patient_routes import patient_bp
     from app.routes.appointment_routes import appointment_bp
     
-    app.register_blueprint(auth_bp, url_prefix='/api/auth')
-    app.register_blueprint(admin_bp, url_prefix='/api/admin')
-    app.register_blueprint(doctor_bp, url_prefix='/api/doctor')
-    app.register_blueprint(patient_bp, url_prefix='/api/patient')
-    app.register_blueprint(appointment_bp, url_prefix='/api/appointments')
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(admin_bp, url_prefix='/admin')
+    app.register_blueprint(doctor_bp, url_prefix='/doctor')
+    app.register_blueprint(patient_bp, url_prefix='/patient')
+    app.register_blueprint(appointment_bp, url_prefix='/appointments')
+
+
+def register_error_handlers(app):
+    """Register error handlers"""
     
-    return app
+    @app.errorhandler(404)
+    def not_found(error):
+        if request.path.startswith('/api'):
+            return jsonify({'error': 'Not found', 'message': 'Resource not found'}), 404
+        return render_template('login.html'), 404
+    
+    @app.errorhandler(500)
+    def internal_server_error(error):
+        if request.path.startswith('/api'):
+            return jsonify({'error': 'Internal server error'}), 500
+        return "Internal Server Error", 500
