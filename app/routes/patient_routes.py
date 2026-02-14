@@ -95,13 +95,13 @@ def book_appointment(doctor_id):
             }
             
         try:
-            appointment = PatientService.book_appointment(
-                patient_id=patient.id,
-                doctor_id=doctor_id,
-                date_str=data['appointment_date'],
-                time_str=data['appointment_time'],
-                reason=data.get('reason', 'General Checkup')
-            )
+            appointment = AppointmentService.book_appointment({
+                'patient_id': patient.id,
+                'doctor_id': doctor_id,
+                'appointment_date': data['appointment_date'],
+                'appointment_time': data['appointment_time'],
+                'reason': data.get('reason', 'General Checkup')
+            })
             if request.is_json:
                 return jsonify({'message': 'Appointment booked', 'appointment': appointment.to_dict()}), 201
             
@@ -121,12 +121,16 @@ def my_appointments():
     """View patient's appointments"""
     if current_user.role != 'patient': abort(403)
     
+    patient = Patient.query.filter_by(user_id=current_user.id).first()
+    if not patient:
+        flash('Patient profile not found', 'danger')
+        return redirect(url_for('auth.home'))
+
     status = request.args.get('status')
     upcoming = request.args.get('upcoming', 'false').lower() == 'true'
     
-    appointments = AppointmentService.get_appointments(
-        user_id=current_user.id, 
-        role='patient', 
+    appointments = AppointmentService.get_patient_appointments(
+        patient_id=patient.id, 
         status=status,
         upcoming=upcoming
     )
@@ -143,7 +147,7 @@ def cancel_appointment(appointment_id):
     if current_user.role != 'patient': abort(403)
     
     try:
-        AppointmentService.update_appointment_status(
+        AppointmentService.update_status(
             appointment_id=appointment_id,
             status='cancelled',
             user_role='patient',

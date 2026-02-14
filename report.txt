@@ -1,0 +1,63 @@
+# Project Audit Report: Hospital Management System
+
+## 1. Route Analysis Table
+
+| Route Path | HTTP Method | Template Used | Model(s) Used | Service(s) Used | Notes |
+|------------|-------------|---------------|---------------|-----------------|-------|
+| `/` | GET | (Redirect) | User | - | Redirects to role dashboard |
+| `/login` | GET, POST | `auth/login.html` | User | `AuthService` | Email-based login |
+| `/admin/login` | GET, POST | `auth/admin_login.html` | User | `AuthService` | Username-based login |
+| `/register` | GET, POST | `auth/register.html` | User, Doctor, Patient | `AuthService` | Dual registration |
+| `/forgot-password`| GET, POST | `auth/forgot_password.html` | User | `AuthService` | |
+| `/reset-password` | GET, POST | `auth/reset_password.html` | User | `AuthService` | |
+| `/logout` | GET, POST | (Redirect) | - | - | |
+| `/admin/dashboard`| GET | `admin/admin_dashboard.html` | Bed, Med, Amb, User, Appt | `AdminService` | |
+| `/admin/beds` | GET, POST | `admin/manage_beds.html` | Bed | `AdminService` | |
+| `/admin/medicines`| GET, POST | `admin/manage_medicines.html` | Medicine | `AdminService` | |
+| `/admin/ambulances`| GET, POST | `admin/manage_ambulances.html` | Ambulance | `AdminService` | |
+| `/admin/doctors` | GET | `admin/doctor_approvals.html` | Doctor | - | |
+| `/admin/users` | GET | `admin/manage_users.html` | User | - | |
+| `/doctor/dashboard`| GET | `doctor/doctor_dashboard.html`| Doctor, Appointment | `DoctorService` | |
+| `/doctor/appointments`| GET | `doctor/doctor_appointments.html`| Appointment | `AppointmentService`| |
+| `/doctor/patient/<id>/history`| GET | `doctor/patient_history.html`| Patient, Appointment | `DoctorService` | |
+| `/doctor/availability`| GET, POST | `doctor/doctor_availability.html`| Doctor | `DoctorService` | |
+| `/patient/dashboard`| GET | `patient/patient_dashboard.html`| Patient, Appointment | `PatientService` | |
+| `/patient/doctors`| GET | `patient/patient_doctors.html`| Doctor | `PatientService` | |
+| `/patient/book/<id>`| GET, POST | `patient/book_appointment.html`| Doctor, Appointment | `AppointmentService`| |
+| `/patient/prescriptions`| GET | `patient/patient_prescriptions.html`| Prescription | `PrescriptionService`| |
+
+## 2. Database Models Summary
+
+| Table Name | Description | Key Columns | Relationships |
+|------------|-------------|-------------|---------------|
+| `users` | Core auth table | email, username, password_hash, role, is_active | 1:1 with Doctors/Patients |
+| `doctors` | Medical staff | specialization, license_number, consultation_fee | 1:N with Appointments/Prescriptions |
+| `patients` | Hospital patients | dob, phone, medical_history (JSON) | 1:N with Appointments/Prescriptions |
+| `appointments` | Booking data | appointment_number, date, time, status | 1:1 with Prescription, 1:1 with Rating |
+| `prescriptions` | Medical orders | prescription_number, diagnosis, medicines (JSON) | 1:N with PrescriptionItem |
+| `beds` | Resource | bed_number, ward, is_occupied | - |
+| `medicines` | Resource | name, stock_quantity, price, expiry_date | - |
+| `ambulances` | Resource | vehicle_number, driver_name, is_available | - |
+
+## 3. Migration Consistency Check
+
+- **Missing Tables**: The migration script `58547fbce62c` does **NOT** include definitions for `beds`, `medicines`, or `ambulances`.
+- **Action Required**: A new migration must be generated (`flask db migrate`) to create these tables in the production/dev database.
+
+## 4. Template Consistency Check
+
+- **Redundancy**: Templates exist both in `app/templates/` (root) and `app/templates/[role]/`.
+- **Usage**: Routes are correctly using the subdirectory versions (e.g., `auth/login.html`), making the root files redundant.
+- **Missing**: All templates referenced in `render_template` calls were found in the `app/templates` subdirectory structure.
+
+## 5. Security & Authentication
+
+- **Enforcement**: Most routes are protected via `@login_required` or `@role_required` decorators.
+- **Dual Support**: `login_required` decorator in `decorators.py` correctly handles both Session-based (UI) and JWT-based (API) authentication.
+- **Admin Specific**: Admin routes have explicit `current_user.role != 'admin'` checks for extra security.
+
+## 6. Mismatches & Identified Issues
+
+1. **Migration Gap**: Resource tables (`beds`, `medicines`, `ambulances`) are defined in models but missing from the initial migration.
+2. **Template Duplication**: Root `app/templates` contains copies of files managed in subdirectories.
+3. **Medicines model to_dict**: The `to_dict()` method in `Medicine` (resource.py) lacks the `expiry_date` field, though it is present in the model class.

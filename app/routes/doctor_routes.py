@@ -48,10 +48,14 @@ def incoming_appointments():
     """Manage appointment requests and schedule"""
     if current_user.role != 'doctor': abort(403)
     
+    doctor = Doctor.query.filter_by(user_id=current_user.id).first()
+    if not doctor:
+        flash('Doctor profile not found', 'danger')
+        return redirect(url_for('auth.home'))
+
     status = request.args.get('status', 'pending')
-    appointments = AppointmentService.get_appointments(
-        user_id=current_user.id,
-        role='doctor',
+    appointments = AppointmentService.get_doctor_appointments(
+        doctor_id=doctor.id,
         status=status
     )
     
@@ -66,10 +70,15 @@ def update_status(appointment_id, status):
     """Accept, reject, or complete an appointment"""
     if current_user.role != 'doctor': abort(403)
     
-    if DoctorService.update_appointment_status(appointment_id, status):
+    try:
+        AppointmentService.update_status(
+            appointment_id=appointment_id, 
+            status=status,
+            user_role='doctor'
+        )
         flash(f'Appointment {status} successfully', 'success')
-    else:
-        flash('Error updating appointment status', 'danger')
+    except Exception as e:
+        flash(f'Error updating appointment status: {str(e)}', 'danger')
         
     return redirect(url_for('doctor.incoming_appointments', status='pending'))
 

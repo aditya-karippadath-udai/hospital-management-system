@@ -17,17 +17,17 @@
                href="{{ url_for('doctor.incoming_appointments', status='pending') }}">
                <i class="bi bi-hourglass me-2"></i> Pending
             </a>
-            <a class="nav-link {% if request.args.get('status') == 'approved' %}active{% endif %}" 
-               href="{{ url_for('doctor.incoming_appointments', status='approved') }}">
-               <i class="bi bi-check-circle me-2"></i> Approved
+            <a class="nav-link {% if request.args.get('status') == 'confirmed' %}active{% endif %}" 
+               href="{{ url_for('doctor.incoming_appointments', status='confirmed') }}">
+               <i class="bi bi-check-circle me-2"></i> Confirmed
             </a>
             <a class="nav-link {% if request.args.get('status') == 'completed' %}active{% endif %}" 
                href="{{ url_for('doctor.incoming_appointments', status='completed') }}">
                <i class="bi bi-clipboard-check me-2"></i> Completed
             </a>
-            <a class="nav-link {% if request.args.get('status') == 'rejected' %}active{% endif %}" 
-               href="{{ url_for('doctor.incoming_appointments', status='rejected') }}">
-               <i class="bi bi-x-circle me-2"></i> Rejected
+            <a class="nav-link {% if request.args.get('status') == 'cancelled' %}active{% endif %}" 
+               href="{{ url_for('doctor.incoming_appointments', status='cancelled') }}">
+               <i class="bi bi-x-circle me-2"></i> Cancelled
             </a>
         </div>
     </div>
@@ -60,14 +60,14 @@
                         <td class="text-end">
                             {% if appt.status == 'pending' %}
                                 <div class="d-flex justify-content-end gap-2">
-                                    <form action="{{ url_for('doctor.update_status', appointment_id=appt.id, status='approved') }}" method="POST">
-                                        <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                                    <form action="{{ url_for('doctor.update_status', appointment_id=appt.id, status='confirmed') }}" method="POST">
+                                        <button type="submit" class="btn btn-sm btn-success">Confirm</button>
                                     </form>
-                                    <form action="{{ url_for('doctor.update_status', appointment_id=appt.id, status='rejected') }}" method="POST">
+                                    <form action="{{ url_for('doctor.update_status', appointment_id=appt.id, status='cancelled') }}" method="POST">
                                         <button type="submit" class="btn btn-sm btn-outline-danger">Reject</button>
                                     </form>
                                 </div>
-                            {% elif appt.status == 'approved' %}
+                            {% elif appt.status == 'confirmed' %}
                                 <a href="{{ url_for('doctor.create_prescription_view', appointment_id=appt.id) }}" class="btn btn-sm btn-primary">
                                     <i class="bi bi-file-earmark-medical me-1"></i> Start Consultation
                                 </a>

@@ -4,6 +4,7 @@ from app.models.doctor import Doctor
 from app.models.patient import Patient
 from app.models.appointment import Appointment
 from app.models.resource import Bed, Medicine, Ambulance
+from sqlalchemy import func
 
 class AdminService:
     @staticmethod
@@ -18,6 +19,7 @@ class AdminService:
             'total_beds': 0,
             'available_beds': 0,
             'total_medicines': 0,
+            'medicine_stock_sum': 0,
             'low_stock_medicines': 0,
             'total_ambulances': 0,
             'available_ambulances': 0,
@@ -42,6 +44,7 @@ class AdminService:
 
         try:
             stats['total_medicines'] = Medicine.query.count()
+            stats['medicine_stock_sum'] = db.session.query(func.sum(Medicine.stock_quantity)).scalar() or 0
             stats['low_stock_medicines'] = Medicine.query.filter(Medicine.stock_quantity < 10).count()
         except Exception as e:
             print(f"DEBUG: Medicines table error: {e}")
@@ -54,50 +57,172 @@ class AdminService:
             
         return stats
 
+    # Bed Management
     @staticmethod
     def create_bed(data):
-        bed = Bed(bed_number=data['bed_number'], ward=data['ward'])
-        db.session.add(bed)
-        db.session.commit()
-        return bed
+        try:
+            bed = Bed(bed_number=data['bed_number'], ward=data['ward'])
+            db.session.add(bed)
+            db.session.commit()
+            return bed
+        except Exception as e:
+            db.session.rollback()
+            raise e
 
+    @staticmethod
+    def update_bed(bed_id, data):
+        try:
+            bed = Bed.query.get(bed_id)
+            if bed:
+                bed.bed_number = data.get('bed_number', bed.bed_number)
+                bed.ward = data.get('ward', bed.ward)
+                bed.is_occupied = data.get('is_occupied', bed.is_occupied)
+                db.session.commit()
+                return bed
+            return None
+        except Exception as e:
+            db.session.rollback()
+            raise e
+
+    @staticmethod
+    def delete_bed(bed_id):
+        try:
+            bed = Bed.query.get(bed_id)
+            if bed:
+                db.session.delete(bed)
+                db.session.commit()
+                return True
+            return False
+        except Exception as e:
+            db.session.rollback()
+            raise e
+
+    # Medicine Management
     @staticmethod
     def create_medicine(data):
-        medicine = Medicine(
-            name=data['name'], 
-            stock_quantity=data.get('stock_quantity', 0), 
-            price=data.get('price', 0.0)
-        )
-        db.session.add(medicine)
-        db.session.commit()
-        return medicine
+        try:
+            medicine = Medicine(
+                name=data['name'], 
+                stock_quantity=data.get('stock_quantity', 0), 
+                price=data.get('price', 0.0),
+                expiry_date=data.get('expiry_date')
+            )
+            db.session.add(medicine)
+            db.session.commit()
+            return medicine
+        except Exception as e:
+            db.session.rollback()
+            raise e
 
+    @staticmethod
+    def update_medicine(medicine_id, data):
+        try:
+            medicine = Medicine.query.get(medicine_id)
+            if medicine:
+                medicine.name = data.get('name', medicine.name)
+                medicine.stock_quantity = data.get('stock_quantity', medicine.stock_quantity)
+                medicine.price = data.get('price', medicine.price)
+                medicine.expiry_date = data.get('expiry_date', medicine.expiry_date)
+                db.session.commit()
+                return medicine
+            return None
+        except Exception as e:
+            db.session.rollback()
+            raise e
+
+    @staticmethod
+    def delete_medicine(medicine_id):
+        try:
+            medicine = Medicine.query.get(medicine_id)
+            if medicine:
+                db.session.delete(medicine)
+                db.session.commit()
+                return True
+            return False
+        except Exception as e:
+            db.session.rollback()
+            raise e
+
+    # Ambulance Management
     @staticmethod
     def create_ambulance(data):
-        ambulance = Ambulance(
-            vehicle_number=data['vehicle_number'], 
-            driver_name=data.get('driver_name')
-        )
-        db.session.add(ambulance)
-        db.session.commit()
-        return ambulance
+        try:
+            ambulance = Ambulance(
+                vehicle_number=data['vehicle_number'], 
+                driver_name=data.get('driver_name')
+            )
+            db.session.add(ambulance)
+            db.session.commit()
+            return ambulance
+        except Exception as e:
+            db.session.rollback()
+            raise e
 
     @staticmethod
+    def update_ambulance(ambulance_id, data):
+        try:
+            ambulance = Ambulance.query.get(ambulance_id)
+            if ambulance:
+                ambulance.vehicle_number = data.get('vehicle_number', ambulance.vehicle_number)
+                ambulance.driver_name = data.get('driver_name', ambulance.driver_name)
+                ambulance.is_available = data.get('is_available', ambulance.is_available)
+                db.session.commit()
+                return ambulance
+            return None
+        except Exception as e:
+            db.session.rollback()
+            raise e
+
+    @staticmethod
+    def delete_ambulance(ambulance_id):
+        try:
+            ambulance = Ambulance.query.get(ambulance_id)
+            if ambulance:
+                db.session.delete(ambulance)
+                db.session.commit()
+                return True
+            return False
+        except Exception as e:
+            db.session.rollback()
+            raise e
+
+    # Doctor Approval & User Management
+    @staticmethod
     def approve_doctor(doctor_id):
-        """Approve doctor registration"""
-        doctor = Doctor.query.get(doctor_id)
-        if doctor and doctor.user:
-            doctor.user.is_active = True
-            db.session.commit()
-            return True
-        return False
+        try:
+            doctor = Doctor.query.get(doctor_id)
+            if doctor and doctor.user:
+                doctor.user.is_active = True
+                db.session.commit()
+                return True
+            return False
+        except Exception as e:
+            db.session.rollback()
+            raise e
 
     @staticmethod
     def deapprove_doctor(doctor_id):
-        """Deactivate doctor account"""
-        doctor = Doctor.query.get(doctor_id)
-        if doctor and doctor.user:
-            doctor.user.is_active = False
-            db.session.commit()
-            return True
-        return False
+        try:
+            doctor = Doctor.query.get(doctor_id)
+            if doctor and doctor.user:
+                doctor.user.is_active = False
+                db.session.commit()
+                return True
+            return False
+        except Exception as e:
+            db.session.rollback()
+            raise e
+
+    @staticmethod
+    def toggle_user_status(user_id, active):
+        """Enable or disable any user account"""
+        try:
+            user = User.query.get(user_id)
+            if user:
+                user.is_active = active
+                db.session.commit()
+                return True
+            return False
+        except Exception as e:
+            db.session.rollback()
+            raise e

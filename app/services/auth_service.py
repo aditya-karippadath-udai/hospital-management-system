@@ -21,7 +21,7 @@ class AuthService:
             )
             user.set_password(data['password'])
             db.session.add(user)
-            db.session.flush()  # Get user.id without committing
+            user.flush()  # Get user.id without committing
             
             # Create profile based on role
             if user.role == 'doctor':
@@ -47,23 +47,31 @@ class AuthService:
 
     @staticmethod
     def login_user(email, password):
-        """Validate doctor and patient credentials only"""
-        user = User.query.filter_by(email=email).first()
-        if user and user.role != 'admin' and user.check_password(password):
-            user.last_login = datetime.utcnow()
-            db.session.commit()
-            return user
-        return None
+        """Validate doctor and patient credentials only with safety"""
+        try:
+            user = User.query.filter_by(email=email).first()
+            if user and user.role != 'admin' and user.check_password(password):
+                user.last_login = datetime.utcnow()
+                db.session.commit()
+                return user
+            return None
+        except Exception as e:
+            db.session.rollback()
+            raise e
 
     @staticmethod
     def login_admin(username, password):
-        """Validate admin credentials using username"""
-        user = User.query.filter_by(username=username, role='admin').first()
-        if user and user.check_password(password):
-            user.last_login = datetime.utcnow()
-            db.session.commit()
-            return user
-        return None
+        """Validate admin credentials using username with safety"""
+        try:
+            user = User.query.filter_by(username=username, role='admin').first()
+            if user and user.check_password(password):
+                user.last_login = datetime.utcnow()
+                db.session.commit()
+                return user
+            return None
+        except Exception as e:
+            db.session.rollback()
+            raise e
 
     @staticmethod
     def check_email_exists(email):
@@ -114,15 +122,19 @@ class AuthService:
 
     @staticmethod
     def reset_password(token, new_password):
-        """Reset the user's password using the token"""
-        email = AuthService.verify_reset_token(token)
-        if not email:
-            return False
-            
-        user = User.query.filter_by(email=email).first()
-        if not user:
-            return False
-            
-        user.set_password(new_password)
-        db.session.commit()
-        return True
+        """Reset the user's password using the token with safety"""
+        try:
+            email = AuthService.verify_reset_token(token)
+            if not email:
+                return False
+                
+            user = User.query.filter_by(email=email).first()
+            if not user:
+                return False
+                
+            user.set_password(new_password)
+            db.session.commit()
+            return True
+        except Exception as e:
+            db.session.rollback()
+            raise e

@@ -99,12 +99,16 @@
                     <h6 class="text-muted small fw-semibold uppercase mb-1">Pharmacy</h6>
                     <div class="d-flex align-items-baseline gap-2">
                         <h4 class="fw-bold mb-0 {% if stats.low_stock_medicines > 0 %}text-danger{% else %}text-dark{% endif %}">{{ stats.total_medicines }}</h4>
-                        {% if stats.low_stock_medicines > 0 %}
-                            <span class="badge bg-danger rounded-pill x-small">{{ stats.low_stock_medicines }} Low Stock</span>
-                        {% else %}
-                            <span class="text-muted small">Items in inventory</span>
-                        {% endif %}
+                        <span class="text-muted small">Types</span>
+                        <div class="vr mx-1" style="height: 1rem; align-self: center;"></div>
+                        <h4 class="fw-bold mb-0 text-dark">{{ stats.medicine_stock_sum }}</h4>
+                        <span class="text-muted small">Total Stock</span>
                     </div>
+                    {% if stats.low_stock_medicines > 0 %}
+                        <div class="mt-1">
+                            <span class="badge bg-danger rounded-pill x-small animate-pulse">{{ stats.low_stock_medicines }} Low Stock</span>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

@@ -30,28 +30,7 @@ class PatientService:
             query = query.filter(Doctor.specialization.ilike(f"%{specialization}%"))
         return query.all()
 
-    @staticmethod
-    def book_appointment(patient_id, doctor_id, date_str, time_str, reason):
-        """Create a new appointment request"""
-        try:
-            # Convert strings to date/time objects
-            appt_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-            appt_time = datetime.strptime(time_str, '%H:%M').time()
-            
-            appointment = Appointment(
-                patient_id=patient_id,
-                doctor_id=doctor_id,
-                appointment_date=appt_date,
-                appointment_time=appt_time,
-                reason=reason,
-                status='pending'
-            )
-            db.session.add(appointment)
-            db.session.commit()
-            return appointment
-        except Exception as e:
-            db.session.rollback()
-            raise e
+    # Appointment management is now handled exclusively by AppointmentService
 
     @staticmethod
     def rate_doctor(patient_id, doctor_id, appointment_id, rating, review=None):

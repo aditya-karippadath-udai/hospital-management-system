@@ -20,8 +20,8 @@ class Appointment(db.Model):
     end_time = db.Column(db.Time)
     duration = db.Column(db.Integer, default=30)
     
-    # Status
-    status = db.Column(db.String(20), default='scheduled', index=True)
+    # Status (Pending / Confirmed / Cancelled)
+    status = db.Column(db.String(20), default='pending', index=True)
     cancellation_reason = db.Column(db.String(200))
     rescheduled_from = db.Column(db.Integer, db.ForeignKey('appointments.id'), nullable=True)
     

@@ -54,11 +54,18 @@
                     </td>
                     <td class="text-end">
                         {% if user.id != current_user.id %}
-                            <form action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="POST" onsubmit="return confirm('Permanently delete this user?')">
-                                <button type="submit" class="btn btn-sm btn-light border text-danger">
-                                    <i class="bi bi-person-x me-1"></i> Delete
-                                </button>
-                            </form>
+                            <div class="d-flex justify-content-end gap-2">
+                                <form action="{{ url_for('admin.toggle_user_status', user_id=user.id) }}" method="POST">
+                                    <button type="submit" class="btn btn-sm {% if user.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}">
+                                        {% if user.is_active %}Deactivate{% else %}Activate{% endif %}
+                                    </button>
+                                </form>
+                                <form action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="POST" onsubmit="return confirm('Permanently delete this user?')">
+                                    <button type="submit" class="btn btn-sm btn-light border text-danger">
+                                        <i class="bi bi-person-x"></i>
+                                    </button>
+                                </form>
+                            </div>
                         {% else %}
                             <span class="badge bg-light text-muted border">Current User</span>
                         {% endif %}

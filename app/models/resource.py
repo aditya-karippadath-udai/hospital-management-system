@@ -23,6 +23,7 @@ class Medicine(db.Model):
     name = db.Column(db.String(200), nullable=False)
     stock_quantity = db.Column(db.Integer, default=0)
     price = db.Column(db.Numeric(10, 2), default=0.00)
+    expiry_date = db.Column(db.Date)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):

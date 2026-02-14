@@ -6,11 +6,11 @@ from datetime import datetime, time, timedelta, date
 from sqlalchemy import and_
 
 class AppointmentService:
-    """Enhanced service for appointment management with strict validation"""
+    """Enhanced service for appointment management with strict validation and transaction safety"""
     
     @staticmethod
-    def create_appointment(data):
-        """Create a new appointment with validation"""
+    def book_appointment(data):
+        """Create a new appointment with validation and transaction safety"""
         try:
             doctor_id = data['doctor_id']
             patient_id = data['patient_id']
@@ -18,7 +18,6 @@ class AppointmentService:
             appointment_time = data['appointment_time']
 
             # 1. Prevent booking in the past
-            # Convert string to date/time if necessary
             if isinstance(appointment_date, str):
                 appointment_date = datetime.strptime(appointment_date, '%Y-%m-%d').date()
             if isinstance(appointment_time, str):
@@ -32,15 +31,15 @@ class AppointmentService:
             if not AppointmentService.is_doctor_available(doctor_id, appointment_date, appointment_time):
                 raise ValueError("Doctor is not available at the selected time")
 
-            # 3. Prevent Double Booking (Strict check for 'scheduled' or 'confirmed' status)
+            # 3. Prevent Double Booking (Collision Check)
             existing = Appointment.query.filter_by(
                 doctor_id=doctor_id,
                 appointment_date=appointment_date,
                 appointment_time=appointment_time
-            ).filter(Appointment.status.in_(['scheduled', 'confirmed'])).first()
+            ).filter(Appointment.status.in_(['pending', 'confirmed', 'scheduled'])).first()
             
             if existing:
-                raise ValueError("This time slot is already booked")
+                raise ValueError("This time slot is already booked or has a pending request")
 
             appointment = Appointment(
                 doctor_id=doctor_id,
@@ -52,7 +51,7 @@ class AppointmentService:
                 symptoms=data.get('symptoms', ''),
                 appointment_type=data.get('appointment_type', 'regular'),
                 consultation_fee=data.get('consultation_fee'),
-                status='pending'  # Initial status for fresher-level flow
+                status='pending'  # Initial status
             )
             
             db.session.add(appointment)
@@ -61,25 +60,28 @@ class AppointmentService:
         except Exception as e:
             db.session.rollback()
             raise e
-    
+
     @staticmethod
-    def update_appointment_status(appointment_id, status, user_role, **kwargs):
-        """Update appointment status with transition logic"""
+    def update_status(appointment_id, status, user_role, **kwargs):
+        """Update appointment status with transition logic and transaction safety"""
         try:
             appointment = Appointment.query.get(appointment_id)
             if not appointment:
                 raise ValueError("Appointment not found")
             
             # Role-based transition validation
-            if status in ['approved', 'rejected'] and user_role != 'doctor':
-                raise ValueError("Only doctors can approve or reject appointments")
+            if status in ['confirmed', 'cancelled'] and user_role == 'doctor':
+                # Doctor can confirm pending or cancel
+                pass
+            elif status == 'cancelled' and user_role == 'patient':
+                if appointment.status != 'pending':
+                    raise ValueError("Patients can only cancel pending appointments")
+            elif status == 'completed' and user_role == 'doctor':
+                pass
             
-            if status == 'cancelled' and user_role == 'patient' and appointment.status != 'pending':
-                raise ValueError("Patients can only cancel pending appointments")
-
             appointment.status = status
             
-            if status == 'approved':
+            if status == 'confirmed':
                 appointment.confirmed_at = datetime.utcnow()
             elif status == 'completed':
                 appointment.completed_at = datetime.utcnow()
@@ -95,7 +97,27 @@ class AppointmentService:
         except Exception as e:
             db.session.rollback()
             raise e
-    
+
+    @staticmethod
+    def get_patient_appointments(patient_id, status=None, upcoming=False):
+        """Retrieve appointments for a specific patient"""
+        query = Appointment.query.filter_by(patient_id=patient_id)
+        if status:
+            query = query.filter_by(status=status)
+        if upcoming:
+            query = query.filter(Appointment.appointment_date >= datetime.now().date())
+        return query.order_by(Appointment.appointment_date.asc(), Appointment.appointment_time.asc()).all()
+
+    @staticmethod
+    def get_doctor_appointments(doctor_id, status=None, upcoming=False):
+        """Retrieve appointments for a specific doctor"""
+        query = Appointment.query.filter_by(doctor_id=doctor_id)
+        if status:
+            query = query.filter_by(status=status)
+        if upcoming:
+            query = query.filter(Appointment.appointment_date >= datetime.now().date())
+        return query.order_by(Appointment.appointment_date.asc(), Appointment.appointment_time.asc()).all()
+
     @staticmethod
     def is_doctor_available(doctor_id, appointment_date, appointment_time):
         """Check if doctor is available at specific date and time"""
@@ -128,22 +150,3 @@ class AppointmentService:
                 return False
         
         return True
-
-    @staticmethod
-    def get_appointments(user_id, role, status=None, upcoming=False):
-        """Filterable appointment Retrieval"""
-        if role == 'doctor':
-            doctor = Doctor.query.filter_by(user_id=user_id).first()
-            query = Appointment.query.filter_by(doctor_id=doctor.id)
-        else:
-            patient = Patient.query.filter_by(user_id=user_id).first()
-            query = Appointment.query.filter_by(patient_id=patient.id)
-            
-        if status:
-            query = query.filter_by(status=status)
-            
-        if upcoming:
-            today = datetime.now().date()
-            query = query.filter(Appointment.appointment_date >= today)
-            
-        return query.order_by(Appointment.appointment_date.asc(), Appointment.appointment_time.asc()).all()

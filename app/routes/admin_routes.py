@@ -86,7 +86,8 @@ def manage_medicines():
             data = {
                 'name': request.form.get('name'),
                 'stock_quantity': int(request.form.get('stock_quantity', 0)),
-                'price': float(request.form.get('price', 0))
+                'price': float(request.form.get('price', 0)),
+                'expiry_date': datetime.strptime(request.form.get('expiry_date'), '%Y-%m-%d').date() if request.form.get('expiry_date') else None
             }
             
         try:
@@ -189,6 +190,21 @@ def list_users():
     users = User.query.all()
     if request.is_json: return jsonify({'users': [u.to_dict() for u in users]}), 200
     return render_template('admin/manage_users.html', users=users)
+
+@admin_bp.route('/users/<int:user_id>/toggle', methods=['POST'])
+@login_required
+def toggle_user_status(user_id):
+    if current_user.role != 'admin': abort(403)
+    user = User.query.get_or_404(user_id)
+    if user.id == current_user.id:
+        flash('You cannot deactivate yourself!', 'danger')
+        return redirect(url_for('admin.list_users'))
+    
+    user.is_active = not user.is_active
+    db.session.commit()
+    status = "activated" if user.is_active else "deactivated"
+    flash(f'User {user.username} {status}', 'success')
+    return redirect(url_for('admin.list_users'))
 
 @admin_bp.route('/users/<int:user_id>/delete', methods=['POST'])
 @login_required

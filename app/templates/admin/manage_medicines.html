@@ -20,7 +20,7 @@
                 <tr>
                     <th>Medicine Name</th>
                     <th>Stock Level</th>
-                    <th>Price (Unit)</th>
+                    <th>Expiry Date</th>
                     <th>Status</th>
                     <th class="text-end">Actions</th>
                 </tr>
@@ -36,12 +36,15 @@
                         <div class="d-flex align-items-center gap-2">
                             <div class="progress flex-grow-1" style="height: 6px; min-width: 100px;">
                                 <div class="progress-bar {% if med.stock_quantity < 10 %}bg-danger{% elif med.stock_quantity < 30 %}bg-warning{% else %}bg-success{% endif %}" 
-                                     style="width: {{ (med.stock_quantity if med.stock_quantity <= 100 else 100) }}%"></div>
+                                     style="width: {{ med.stock_quantity if med.stock_quantity <= 100 else 100 }}%;"></div>
                             </div>
                             <span class="small fw-bold">{{ med.stock_quantity }}</span>
                         </div>
                     </td>
                     <td>${{ "%.2f"|format(med.price) }}</td>
+                    <td class="small {% if med.expiry_date and med.expiry_date < now.date() %}text-danger fw-bold{% endif %}">
+                        {{ med.expiry_date.strftime('%d %b, %Y') if med.expiry_date else 'N/A' }}
+                    </td>
                     <td>
                         {% if med.stock_quantity < 10 %}
                             <span class="badge bg-soft-danger text-danger">Low Stock</span>
@@ -79,13 +82,17 @@
                     <input type="text" name="name" class="form-control bg-light border-0" placeholder="e.g. Paracetamol" required>
                 </div>
                 <div class="row g-3">
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
                         <label class="form-label small fw-semibold">Stock Quantity</label>
                         <input type="number" name="stock_quantity" class="form-control bg-light border-0" placeholder="0" required>
                     </div>
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
                         <label class="form-label small fw-semibold">Price per Unit ($)</label>
                         <input type="number" step="0.01" name="price" class="form-control bg-light border-0" placeholder="0.00" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label small fw-semibold">Expiry Date</label>
+                        <input type="date" name="expiry_date" class="form-control bg-light border-0">
                     </div>
                 </div>
             </div>

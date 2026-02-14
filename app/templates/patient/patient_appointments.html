@@ -37,12 +37,14 @@
                             <div class="text-muted x-small">{{ appt.appointment_time.strftime('%I:%M %p') }}</div>
                         </td>
                         <td>
-                            {% if appt.status == 'approved' %}
-                                <span class="badge bg-soft-success text-success">Approved</span>
+                            {% if appt.status == 'confirmed' %}
+                                <span class="badge bg-soft-success text-success">Confirmed</span>
                             {% elif appt.status == 'pending' %}
                                 <span class="badge bg-soft-warning text-warning">Pending</span>
                             {% elif appt.status == 'completed' %}
                                 <span class="badge bg-soft-primary text-primary">Completed</span>
+                            {% elif appt.status == 'cancelled' %}
+                                <span class="badge bg-soft-danger text-danger">Cancelled</span>
                             {% else %}
                                 <span class="badge bg-soft-secondary text-secondary">{{ appt.status | capitalize }}</span>
                             {% endif %}
@@ -54,8 +56,10 @@
                                 </form>
                             {% elif appt.status == 'completed' %}
                                 <a href="{{ url_for('patient.my_prescriptions') }}" class="btn btn-sm btn-light border">View Record</a>
+                            {% elif appt.status == 'confirmed' %}
+                                <span class="badge bg-soft-success text-success small">Scheduled</span>
                             {% else %}
-                                <span class="text-muted small">Confirmed</span>
+                                <span class="text-muted small">Closed</span>
                             {% endif %}
                         </td>
                     </tr>
