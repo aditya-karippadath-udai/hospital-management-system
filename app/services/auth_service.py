@@ -47,8 +47,18 @@ class AuthService:
 
     @staticmethod
     def login_user(email, password):
-        """Validate user credentials"""
+        """Validate doctor and patient credentials only"""
         user = User.query.filter_by(email=email).first()
+        if user and user.role != 'admin' and user.check_password(password):
+            user.last_login = datetime.utcnow()
+            db.session.commit()
+            return user
+        return None
+
+    @staticmethod
+    def login_admin(username, password):
+        """Validate admin credentials using username"""
+        user = User.query.filter_by(username=username, role='admin').first()
         if user and user.check_password(password):
             user.last_login = datetime.utcnow()
             db.session.commit()

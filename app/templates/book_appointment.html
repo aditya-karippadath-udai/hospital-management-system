@@ -1,0 +1,63 @@
+{% extends "base_patient.html" %}
+
+{% block title %}Book Appointment{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-primary text-white py-3">
+                <h5 class="fw-bold mb-0">Book an Appointment</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-4 p-3 bg-light rounded shadow-sm">
+                    <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-3">
+                        <i class="fas fa-user-md fa-2x text-primary"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 text-muted small">You are booking with:</h6>
+                        <h5 class="fw-bold mb-0">Dr. {{ doctor.user.full_name }}</h5>
+                        <small class="text-primary">{{ doctor.specialization }}</small>
+                    </div>
+                </div>
+
+                <form method="POST">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="appointment_date" class="form-label fw-bold small">Preferred Date</label>
+                            <input type="date" class="form-control" id="appointment_date" name="appointment_date" 
+                                   min="{{ today }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="appointment_time" class="form-label fw-bold small">Preferred Time</label>
+                            <input type="time" class="form-control" id="appointment_time" name="appointment_time" 
+                                   required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="reason" class="form-label fw-bold small">Reason for Visit (Optional)</label>
+                        <textarea class="form-control" id="reason" name="reason" rows="3" 
+                                  placeholder="Briefly describe your symptoms or reason for the visit"></textarea>
+                    </div>
+
+                    <div class="alert alert-info border-0 bg-info bg-opacity-10 py-3 mb-4">
+                        <div class="d-flex">
+                            <i class="fas fa-info-circle me-3 mt-1 text-info"></i>
+                            <div>
+                                <p class="mb-1 small">Your appointment will be marked as <strong>Pending</strong>. You will receive a notification once the doctor approves it.</p>
+                                <p class="mb-0 small fw-bold">Consultation Fee: ${{ doctor.consultation_fee }} (Payable at clinic)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary py-2 fw-bold">Confirm Booking</button>
+                        <a href="{{ url_for('patient.list_doctors') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

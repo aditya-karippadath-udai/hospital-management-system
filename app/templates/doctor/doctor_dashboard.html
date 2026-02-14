@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Doctor Dashboard{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="h3 fw-bold mb-1">Hello, Dr. {{ doctor.user.last_name }}</h1>
+        <p class="text-muted">Here's your schedule for today.</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <div class="badge {% if doctor.is_available %}bg-soft-success text-success{% else %}bg-soft-danger text-danger{% endif %} p-2">
+            <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>
+            {{ 'Available for Consult' if doctor.is_available else 'Currently Unavailable' }}
+        </div>
+    </div>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="stat-icon bg-soft-primary">
+                <i class="bi bi-calendar-event"></i>
+            </div>
+            <h6 class="text-muted small fw-semibold uppercase">Total Appointments</h6>
+            <h3 class="fw-bold mb-0">{{ stats.total_appointments }}</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="stat-icon bg-soft-warning">
+                <i class="bi bi-hourglass-split"></i>
+            </div>
+            <h6 class="text-muted small fw-semibold uppercase">Pending Requests</h6>
+            <h3 class="fw-bold mb-0">{{ stats.pending_requests }}</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="stat-icon bg-soft-success">
+                <i class="bi bi-calendar-check"></i>
+            </div>
+            <h6 class="text-muted small fw-semibold uppercase">Upcoming Today</h6>
+            <h3 class="fw-bold mb-0">{{ stats.upcoming_today }}</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="stat-icon bg-soft-danger">
+                <i class="bi bi-check-all"></i>
+            </div>
+            <h6 class="text-muted small fw-semibold uppercase">Completed Total</h6>
+            <h3 class="fw-bold mb-0">{{ stats.completed_total }}</h3>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Today's Agenda -->
+    <div class="col-lg-8">
+        <div class="table-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0">Today's Agenda</h5>
+                <a href="{{ url_for('doctor.incoming_appointments') }}" class="btn btn-sm btn-light">Manage All</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Patient</th>
+                            <th>Reason</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if today_appointments %}
+                            {% for appt in today_appointments %}
+                            <tr>
+                                <td class="fw-bold text-accent">{{ appt.appointment_time.strftime('%I:%M %p') }}</td>
+                                <td>
+                                    <div class="fw-semibold">{{ appt.patient.user.first_name }} {{ appt.patient.user.last_name }}</div>
+                                    <div class="text-muted x-small">ID: #P-{{ appt.patient.id }}</div>
+                                </td>
+                                <td><span class="text-truncate d-inline-block" style="max-width: 150px;">{{ appt.reason }}</span></td>
+                                <td class="text-end">
+                                    <a href="{{ url_for('doctor.create_prescription_view', appointment_id=appt.id) }}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-file-earmark-medical me-1"></i> Prescribe
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted small">No scheduled appointments for today.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Links -->
+    <div class="col-lg-4">
+        <div class="card p-4 h-100">
+            <h5 class="fw-bold mb-4">Consultation Desk</h5>
+            <div class="d-grid gap-3">
+                <a href="{{ url_for('doctor.incoming_appointments', status='pending') }}" class="btn btn-light text-start p-3 border-0 bg-soft-primary d-flex align-items-center gap-3">
+                    <i class="bi bi-clock-history h4 mb-0"></i>
+                    <div>
+                        <div class="fw-bold small">New Requests</div>
+                        <div class="x-small text-muted">Review patient appointment asks</div>
+                    </div>
+                </a>
+                <a href="{{ url_for('doctor.manage_availability') }}" class="btn btn-light text-start p-3 border-0 bg-soft-success d-flex align-items-center gap-3">
+                    <i class="bi bi-calendar2-range h4 mb-0"></i>
+                    <div>
+                        <div class="fw-bold small">Manage Schedule</div>
+                        <div class="x-small text-muted">Set working hours and availability</div>
+                    </div>
+                </a>
+                <div class="bg-light p-3 rounded-3 x-small">
+                    <div class="fw-bold mb-2">My Profile Summary</div>
+                    <div class="mb-1 text-muted">Specialization: <strong>{{ doctor.specialization }}</strong></div>
+                    <div class="text-muted">License: <strong>{{ doctor.license_number }}</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

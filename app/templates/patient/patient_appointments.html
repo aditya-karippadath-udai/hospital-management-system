@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}My Appointments{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 fw-bold mb-0">Visit History</h1>
+        <p class="text-muted small mb-0">Track your past and upcoming medical appointments</p>
+    </div>
+    <a href="{{ url_for('patient.list_doctors') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-2"></i> Book New
+    </a>
+</div>
+
+<div class="table-container">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Doctor</th>
+                    <th>Schedule</th>
+                    <th>Status</th>
+                    <th class="text-end">Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if appointments %}
+                    {% for appt in appointments %}
+                    <tr>
+                        <td>
+                            <div class="fw-bold">Dr. {{ appt.doctor.user.first_name }} {{ appt.doctor.user.last_name }}</div>
+                            <div class="text-muted x-small">{{ appt.doctor.specialization }}</div>
+                        </td>
+                        <td>
+                            <div class="fw-semibold small">{{ appt.appointment_date.strftime('%d %b, %Y') }}</div>
+                            <div class="text-muted x-small">{{ appt.appointment_time.strftime('%I:%M %p') }}</div>
+                        </td>
+                        <td>
+                            {% if appt.status == 'approved' %}
+                                <span class="badge bg-soft-success text-success">Approved</span>
+                            {% elif appt.status == 'pending' %}
+                                <span class="badge bg-soft-warning text-warning">Pending</span>
+                            {% elif appt.status == 'completed' %}
+                                <span class="badge bg-soft-primary text-primary">Completed</span>
+                            {% else %}
+                                <span class="badge bg-soft-secondary text-secondary">{{ appt.status | capitalize }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            {% if appt.status == 'pending' %}
+                                <form action="{{ url_for('patient.cancel_appointment', appointment_id=appt.id) }}" method="POST" onsubmit="return confirm('Cancel request?')">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                                </form>
+                            {% elif appt.status == 'completed' %}
+                                <a href="{{ url_for('patient.my_prescriptions') }}" class="btn btn-sm btn-light border">View Record</a>
+                            {% else %}
+                                <span class="text-muted small">Confirmed</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5 text-muted">
+                            <i class="bi bi-calendar-x d-block h2 mb-3"></i>
+                            No appointments found.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

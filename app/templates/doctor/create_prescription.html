@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Create Prescription{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center" x-data="{ medicines: [{name: '', dosage: '', freq: ''}] }">
+    <div class="col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 fw-bold mb-0">Medical Prescription</h1>
+                <p class="text-muted small mb-0">Finalize consultation for {{ appointment.patient.user.first_name }} {{ appointment.patient.user.last_name }}</p>
+            </div>
+        </div>
+
+        <div class="card p-4 shadow-sm border-0">
+            <form action="{{ url_for('doctor.create_prescription_view', appointment_id=appointment.id) }}" method="POST">
+                
+                <div class="row g-4 mb-5">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Diagnosis</label>
+                        <textarea name="diagnosis" class="form-control bg-light border-0" rows="3" placeholder="Primary medical findings..." required></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Symptoms</label>
+                        <textarea name="symptoms" class="form-control bg-light border-0" rows="3" placeholder="Patient reported symptoms..." required></textarea>
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0"><i class="bi bi-capsule me-2 text-primary"></i> Medication Details</h6>
+                        <button type="button" @click="medicines.push({name: '', dosage: '', freq: ''})" class="btn btn-sm btn-outline-primary border-0 bg-soft-primary">
+                            <i class="bi bi-plus-circle me-1"></i> Add Medicine
+                        </button>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-borderless align-middle">
+                            <thead>
+                                <tr class="text-muted x-small uppercase">
+                                    <th style="width: 40%;">Medicine Name</th>
+                                    <th style="width: 25%;">Dosage</th>
+                                    <th style="width: 25%;">Frequency</th>
+                                    <th style="width: 10%;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="(med, index) in medicines" :key="index">
+                                    <tr>
+                                        <td>
+                                            <input type="text" name="med_name[]" x-model="med.name" class="form-control border-0 bg-light" placeholder="e.g. Amoxicillin" required>
+                                        </td>
+                                        <td>
+                                            <input type="text" name="med_dosage[]" x-model="med.dosage" class="form-control border-0 bg-light" placeholder="e.g. 500mg" required>
+                                        </td>
+                                        <td>
+                                            <input type="text" name="med_freq[]" x-model="med.freq" class="form-control border-0 bg-light" placeholder="e.g. 2x Daily" required>
+                                        </td>
+                                        <td class="text-end">
+                                            <button type="button" @click="medicines.splice(index, 1)" x-show="medicines.length > 1" class="btn btn-sm text-danger border-0">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small fw-bold">Clinical Notes / Advice</label>
+                    <textarea name="advice" class="form-control bg-light border-0" rows="3" placeholder="General advice for the patient..."></textarea>
+                </div>
+
+                <div class="pt-4 border-top">
+                    <button type="submit" class="btn btn-primary px-5 py-2">
+                        Complete Appointment & Save Prescription
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

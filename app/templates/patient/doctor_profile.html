@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Dr. {{ doctor.user.last_name }} - Profile{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card p-0 border-0 overflow-hidden mb-4">
+            <div class="bg-soft-primary p-4 text-center">
+                <div class="bg-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow-sm" style="width: 100px; height: 100px;">
+                    <i class="bi bi-person-badge text-primary" style="font-size: 3rem;"></i>
+                </div>
+                <h2 class="fw-bold mb-1">Dr. {{ doctor.user.first_name }} {{ doctor.user.last_name }}</h2>
+                <div class="badge bg-white text-primary px-3 py-2 fw-bold shadow-sm">{{ doctor.specialization }}</div>
+            </div>
+            
+            <div class="p-4">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold small uppercase text-muted mb-3">Professional Info</h6>
+                        <div class="mb-2"><i class="bi bi-award me-2 text-primary"></i> <strong>License:</strong> {{ doctor.license_number }}</div>
+                        <div class="mb-2"><i class="bi bi-cash-stack me-2 text-primary"></i> <strong>Consultation Fee:</strong> ${{ doctor.consultation_fee or 'N/A' }}</div>
+                        <div><i class="bi bi-calendar3 me-2 text-primary"></i> <strong>Experience:</strong> Senior Consultant</div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold small uppercase text-muted mb-3">Availability</h6>
+                        <div class="mb-2"><i class="bi bi-clock me-2 text-primary"></i> {{ doctor.available_time_start }} - {{ doctor.available_time_end }}</div>
+                        <div class="mb-2"><i class="bi bi-check-circle me-2 text-primary"></i> Available Days: 
+                            <span class="text-muted">{{ doctor.available_days | join(', ') if doctor.available_days else 'Not specified' }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 pt-4 border-top">
+                    <h6 class="fw-bold small uppercase text-muted mb-3">About the Doctor</h6>
+                    <p class="text-muted">Dr. {{ doctor.user.last_name }} is a dedicated medical professional specializing in {{ doctor.specialization }}. With a patient-centric approach, they ensure comprehensive care and personalized treatment plans.</p>
+                </div>
+                
+                <div class="mt-4">
+                    {% if doctor.is_available %}
+                        <a href="{{ url_for('patient.book_appointment', doctor_id=doctor.id) }}" class="btn btn-primary px-4 py-2">
+                            <i class="bi bi-calendar-plus me-2"></i> Book Appointment Now
+                        </a>
+                    {% else %}
+                        <button class="btn btn-light disabled" disabled>Currently Not Accepting Bookings</button>
+                    {% endif %}
+                    <a href="{{ url_for('patient.list_doctors') }}" class="btn btn-outline-secondary ms-2 px-4 py-2">Back to List</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

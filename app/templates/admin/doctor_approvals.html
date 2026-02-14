@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Doctor Approvals{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 fw-bold mb-0">Doctor Directory</h1>
+        <p class="text-muted small mb-0">Verify credentials and manage medical staff access</p>
+    </div>
+</div>
+
+<div class="table-container">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Doctor</th>
+                    <th>Specialization / License</th>
+                    <th>Status</th>
+                    <th class="text-end">Verification</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doctor in doctors %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-soft-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="bi bi-person-badge text-primary"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">Dr. {{ doctor.user.first_name }} {{ doctor.user.last_name }}</div>
+                                <div class="text-muted small">{{ doctor.user.email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fw-semibold">{{ doctor.specialization }}</div>
+                        <div class="text-muted x-small"># {{ doctor.license_number }}</div>
+                    </td>
+                    <td>
+                        {% if doctor.user.is_active %}
+                            <span class="badge bg-soft-success text-success">Approved</span>
+                        {% else %}
+                            <span class="badge bg-soft-warning text-warning">Pending Approval</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        {% if not doctor.user.is_active %}
+                            <form action="{{ url_for('admin.approve_doctor', doctor_id=doctor.id) }}" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-success px-3">Approve</button>
+                            </form>
+                        {% else %}
+                            <form action="{{ url_for('admin.deapprove_doctor', doctor_id=doctor.id) }}" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger px-3">Deactivate</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

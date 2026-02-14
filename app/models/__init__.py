@@ -4,6 +4,7 @@ from app.models.doctor import Doctor
 from app.models.patient import Patient
 from app.models.appointment import Appointment
 from app.models.prescription import Prescription
+from app.models.resource import Bed, Medicine, Ambulance
 
 # This ensures all models are imported and registered with SQLAlchemy's metadata
-__all__ = ['User', 'Doctor', 'Patient', 'Appointment', 'Prescription']
+__all__ = ['User', 'Doctor', 'Patient', 'Appointment', 'Prescription', 'Bed', 'Medicine', 'Ambulance']

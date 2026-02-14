@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Book Appointment{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card p-4 border-0">
+            <div class="text-center mb-4">
+                <div class="bg-soft-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <i class="bi bi-calendar-plus-fill fs-3 text-primary"></i>
+                </div>
+                <h2 class="h4 fw-bold">Request Appointment</h2>
+                <p class="text-muted small">Booking with <strong>Dr. {{ doctor.user.first_name }} {{ doctor.user.last_name }}</strong></p>
+                <div class="badge bg-soft-primary text-primary">{{ doctor.specialization }}</div>
+            </div>
+
+            <form action="{{ url_for('patient.book_appointment', doctor_id=doctor.id) }}" method="POST">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Appointment Date</label>
+                    <input type="date" name="appointment_date" class="form-control bg-light border-0" min="{{ today }}" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Preferred Time</label>
+                    <input type="time" name="appointment_time" class="form-control bg-light border-0" required>
+                    <div class="x-small text-muted mt-1 px-1">Doctor is available between {{ doctor.available_time_start }} and {{ doctor.available_time_end }}</div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small fw-bold">Reason for Visit</label>
+                    <textarea name="reason" class="form-control bg-light border-0" rows="3" placeholder="Briefly describe your health concern..." required></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">
+                    Confirm Booking Request
+                </button>
+                <a href="{{ url_for('patient.list_doctors') }}" class="btn btn-light w-100 mt-2">Cancel</a>
+            </form>
+        </div>
+        
+        <div class="mt-4 p-3 bg-soft-warning rounded-3 border-0">
+            <h6 class="fw-bold x-small uppercase mb-2"><i class="bi bi-info-circle-fill me-1"></i> Important Note</h6>
+            <p class="x-small text-muted mb-0">Appointments are subject to doctor approval. You will receive a notification once the status is updated.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

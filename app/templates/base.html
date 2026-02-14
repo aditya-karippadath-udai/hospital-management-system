@@ -3,149 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Hospital Management System{% endblock %}</title>
+    <title>{% block title %}HMS{% endblock %} - Hospital Management System</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
-    <!-- Custom CSS -->
+    <!-- Custom Theme CSS -->
     <style>
         :root {
-            --primary-color: #0d6efd;
-            --secondary-color: #6c757d;
-            --success-color: #198754;
-            --danger-color: #dc3545;
-            --warning-color: #ffc107;
-            --info-color: #0dcaf0;
+            --hms-primary: #0f172a;
+            --hms-accent: #3b82f6;
+            --hms-bg: #f8fafc;
+            --hms-card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --hms-card-hover: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
         }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--hms-bg);
+            color: #1e293b;
+            overflow-x: hidden;
         }
-        
-        .sidebar {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px 0;
+
+        .navbar {
+            background-color: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 0.75rem 1.5rem;
         }
-        
-        .sidebar .nav-link {
-            color: rgba(255, 255, 255, 0.9);
-            padding: 12px 20px;
-            margin: 5px 10px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--hms-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        
-        .sidebar .nav-link:hover,
-        .sidebar .nav-link.active {
-            background-color: rgba(255, 255, 255, 0.2);
-            color: white;
+
+        .navbar-brand i {
+            color: var(--hms-accent);
+            font-size: 1.5rem;
         }
-        
-        .sidebar .nav-link i {
-            margin-right: 10px;
-            font-size: 1.1rem;
+
+        .nav-link {
+            font-weight: 500;
+            color: #64748b;
+            padding: 0.5rem 1rem !important;
+            border-radius: 6px;
+            transition: all 0.2s;
         }
-        
+
+        .nav-link:hover {
+            color: var(--hms-accent);
+            background-color: #eff6ff;
+        }
+
+        .nav-link.active {
+            color: var(--hms-accent) !important;
+            background-color: #eff6ff;
+        }
+
         .card {
             border: none;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: var(--hms-card-shadow);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-        
+
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        .card-header {
-            background-color: transparent;
-            border-bottom: 2px solid #f0f0f0;
-            font-weight: 600;
-            padding: 15px 20px;
-        }
-        
-        .btn {
-            border-radius: 8px;
-            padding: 10px 20px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-        
-        .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            box-shadow: var(--hms-card-hover);
         }
-        
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-        }
-        
-        .stat-card h3 {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin: 0;
-        }
-        
-        .stat-card p {
-            margin: 0;
-            opacity: 0.9;
-        }
-        
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 1.5rem;
-        }
-        
-        .table {
-            background: white;
+
+        .btn-primary {
+            background-color: var(--hms-accent);
+            border-color: var(--hms-accent);
+            font-weight: 600;
+            padding: 0.6rem 1.25rem;
             border-radius: 8px;
-            overflow: hidden;
         }
-        
-        .badge {
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-weight: 500;
+
+        .btn-primary:hover {
+            background-color: #2563eb;
+            border-color: #2563eb;
         }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--hms-card-shadow);
+        }
+
+        .table thead th {
+            background-color: #f1f5f9;
+            color: #475569;
+            font-weight: 600;
+            border-bottom: none;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .alert {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: var(--hms-card-hover);
+            border-radius: 10px;
+        }
+
+        footer {
+            border-top: 1px solid #e2e8f0;
+            margin-top: 4rem;
+            padding: 2rem 0;
+            color: #64748b;
+        }
+
+        /* Dashboard Stat Cards */
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .bg-soft-primary { background-color: #eff6ff; color: #3b82f6; }
+        .bg-soft-success { background-color: #f0fdf4; color: #22c55e; }
+        .bg-soft-warning { background-color: #fffbeb; color: #f59e0b; }
+        .bg-soft-danger { background-color: #fef2f2; color: #ef4444; }
+
+        {% block extra_css %}{% endblock %}
     </style>
-    
-    {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('auth.home') }}">
+                <i class="bi bi-hospital"></i> 
+                HMS
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.role == 'admin' %}
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.list_doctors') }}"><i class="bi bi-person-badge"></i> Doctors</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.list_users') }}"><i class="bi bi-people"></i> Users</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.manage_beds') }}"><i class="bi bi-hospital-fill"></i> Beds</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.manage_medicines') }}"><i class="bi bi-capsule"></i> Medicines</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.manage_ambulances') }}"><i class="bi bi-truck-front"></i> Ambulances</a></li>
+                        {% elif current_user.role == 'doctor' %}
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('doctor.dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('doctor.incoming_appointments') }}"><i class="bi bi-calendar-event"></i> Appointments</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('doctor.manage_availability') }}"><i class="bi bi-clock-history"></i> Availability</a></li>
+                        {% elif current_user.role == 'patient' %}
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('patient.dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('patient.list_doctors') }}"><i class="bi bi-search"></i> Find Doctors</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('patient.my_appointments') }}"><i class="bi bi-calendar-check"></i> My Appointments</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('patient.my_prescriptions') }}"><i class="bi bi-file-earmark-medical"></i> Prescriptions</a></li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown">
+                                <div class="bg-soft-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                    <i class="bi bi-person"></i>
+                                </div>
+                                {{ current_user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow">
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-person-gear"></i> Profile</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Login</a></li>
+                        <li class="nav-item"><a class="btn btn-primary ms-lg-3" href="{{ url_for('auth.register') }}">Register</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content Area -->
+    <main class="container py-4">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    <div class="alert alert-{{ category }} alert-dismissible fade show mb-4" role="alert">
+                        {% if category == 'success' %}<i class="bi bi-check-circle-fill me-2"></i>{% endif %}
+                        {% if category == 'danger' %}<i class="bi bi-exclamation-triangle-fill me-2"></i>{% endif %}
+                        {% if category == 'warning' %}<i class="bi bi-exclamation-circle-fill me-2"></i>{% endif %}
+                        {% if category == 'info' %}<i class="bi bi-info-circle-fill me-2"></i>{% endif %}
                         {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 {% endfor %}
-            </div>
-        {% endif %}
-    {% endwith %}
-    
-    {% block content %}{% endblock %}
-    
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="container text-center">
+        <p class="mb-0">&copy; 2024 Hospital Management System. All rights reserved.</p>
+        <div class="mt-2">
+            <a href="#" class="text-decoration-none me-3"><i class="bi bi-github"></i> Repository</a>
+            <a href="#" class="text-decoration-none"><i class="bi bi-envelope"></i> Support</a>
+        </div>
+    </footer>
+
     <!-- Bootstrap 5 JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- jQuery (optional) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
+    <!-- Alpine.js (for simple interactions if needed) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>

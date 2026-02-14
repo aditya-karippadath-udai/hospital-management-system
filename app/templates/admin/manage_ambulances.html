@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Ambulances{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 fw-bold mb-0">Emergency Fleet</h1>
+        <p class="text-muted small mb-0">Monitor ambulance availability and dispatch</p>
+    </div>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAmbulanceModal">
+        <i class="bi bi-plus-lg me-2"></i> Register Vehicle
+    </button>
+</div>
+
+<div class="row g-4">
+    {% for ambulance in ambulances %}
+    <div class="col-md-4">
+        <div class="card p-3 border-0">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="stat-icon {% if ambulance.is_available %}bg-soft-success text-success{% else %}bg-soft-danger text-danger{% endif %} mb-0">
+                    <i class="bi bi-truck-front"></i>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-light p-1" data-bs-toggle="dropdown"><i class="bi bi-three-dots-vertical"></i></button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <form action="{{ url_for('admin.toggle_ambulance_status', ambulance_id=ambulance.id) }}" method="POST">
+                                <button type="submit" class="dropdown-item small">Toggle Status</button>
+                            </form>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form action="{{ url_for('admin.delete_ambulance', ambulance_id=ambulance.id) }}" method="POST" onsubmit="return confirm('Remove vehicle?')">
+                                <button type="submit" class="dropdown-item small text-danger">Delete Vehicle</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <h5 class="fw-bold mb-1">{{ ambulance.vehicle_number }}</h5>
+            <p class="text-muted small mb-3"><i class="bi bi-person me-1"></i> Driver: {{ ambulance.driver_name }}</p>
+            
+            <div class="d-flex align-items-center justify-content-between pt-2 border-top">
+                <span class="small fw-semibold">Current State:</span>
+                {% if ambulance.is_available %}
+                    <span class="badge bg-soft-success text-success">Active & Ready</span>
+                {% else %}
+                    <span class="badge bg-soft-danger text-danger">On Mission / Maintenance</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Add Ambulance Modal -->
+<div class="modal fade" id="addAmbulanceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="{{ url_for('admin.manage_ambulances') }}" method="POST" class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="fw-bold">Register Fleet Vehicle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Vehicle Number</label>
+                    <input type="text" name="vehicle_number" class="form-control bg-light border-0" placeholder="e.g. AMB-2024-001" required>
+                </div>
+                <div class="mb-0">
+                    <label class="form-label small fw-semibold">Driver Name</label>
+                    <input type="text" name="driver_name" class="form-control bg-light border-0" placeholder="Full Name" required>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary px-4">Register</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

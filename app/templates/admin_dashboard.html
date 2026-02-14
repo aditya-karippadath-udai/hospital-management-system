@@ -1,114 +1,203 @@
-{% extends "base.html" %}
+{% extends "base_admin.html" %}
 
-{% block title %}Admin Dashboard - Hospital Management System{% endblock %}
+{% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <nav class="col-md-2 d-md-block sidebar">
-            <div class="text-center mb-4">
-                <i class="bi bi-shield-fill-check display-4"></i>
-                <h5 class="mt-2">Admin Panel</h5>
-            </div>
-            
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link active" href="{{ url_for('admin.dashboard') }}">
-                        <i class="bi bi-speedometer2"></i>Dashboard
-                    </a>
-                </li>
-                <!-- ... other links ... -->
-                <li class="nav-item mt-4">
-                    <a class="nav-link" href="{{ url_for('auth.logout') }}">
-                        <i class="bi bi-box-arrow-right"></i>Logout
-                    </a>
-                </li>
-            </ul>
-        </nav>
-        
-        <!-- Main Content -->
-        <main class="col-md-10 ms-sm-auto px-4 py-4">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h2 fw-bold">Admin Dashboard</h1>
-                <div>
-                    <span class="badge bg-primary me-2">Welcome, {{ session.get('user_name', 'Admin') }}</span>
-                </div>
-            </div>
-            
-            <!-- Statistics Cards -->
-            <div class="row mb-4">
-                <div class="col-md-3 mb-3">
-                    <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                        <i class="bi bi-people display-4"></i>
-                        <h3>{{ stats.total_users }}</h3>
-                        <p>Total Users</p>
-                    </div>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                        <i class="bi bi-person-badge display-4"></i>
-                        <h3>{{ stats.total_doctors }}</h3>
-                        <p>Total Doctors</p>
-                    </div>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                        <i class="bi bi-person-hearts display-4"></i>
-                        <h3>{{ stats.total_patients }}</h3>
-                        <p>Total Patients</p>
-                    </div>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-                        <i class="bi bi-calendar-check display-4"></i>
-                        <h3>{{ stats.total_appointments }}</h3>
-                        <p>Total Appointments</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Recent Users Table -->
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Users</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Role</th>
-                                    <th>Status</th>
-                                    <th>Created At</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for user in recent_users %}
-                                <tr>
-                                    <td>{{ user.id }}</td>
-                                    <td>{{ user.first_name }} {{ user.last_name }}</td>
-                                    <td>{{ user.email }}</td>
-                                    <td><span class="badge bg-info">{{ user.role }}</span></td>
-                                    <td>
-                                        {% if user.is_active %}
-                                        <span class="badge bg-success">Active</span>
-                                        {% else %}
-                                        <span class="badge bg-danger">Inactive</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </main>
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2 class="fw-bold">System Overview</h2>
+        <p class="text-muted">High-level statistics and resource monitoring.</p>
     </div>
 </div>
+
+<!-- Primary Stats Row -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card border-start border-4 border-primary h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-muted small text-uppercase">Total Doctors</h6>
+                        <h3 class="fw-bold mb-0">{{ stats.total_doctors }}</h3>
+                    </div>
+                    <div class="text-primary fs-3"><i class="fas fa-user-md"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card border-start border-4 border-info h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-muted small text-uppercase">Total Patients</h6>
+                        <h3 class="fw-bold mb-0">{{ stats.total_patients }}</h3>
+                    </div>
+                    <div class="text-info fs-3"><i class="fas fa-hospital-user"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card border-start border-4 border-success h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-muted small text-uppercase">Appointments</h6>
+                        <h3 class="fw-bold mb-0">{{ stats.total_appointments }}</h3>
+                    </div>
+                    <div class="text-success fs-3"><i class="fas fa-calendar-check"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card border-start border-4 border-warning h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-muted small text-uppercase">Total Users</h6>
+                        <h3 class="fw-bold mb-0">{{ stats.total_users }}</h3>
+                    </div>
+                    <div class="text-warning fs-3"><i class="fas fa-users-cog"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Secondary Resource Stats Row -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="rounded-circle bg-soft-primary p-3 me-3 text-primary">
+                    <i class="fas fa-bed fa-2x"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-0">Beds</h6>
+                    <h4 class="fw-bold mb-0">{{ stats.available_beds }} / {{ stats.total_beds }} <small class="text-success fs-6">Available</small></h4>
+                </div>
+            </div>
+            <div class="card-footer bg-white border-top-0 pb-3">
+                <a href="{{ url_for('admin.manage_beds') }}" class="small text-primary text-decoration-none">Manage Beds <i class="fas fa-chevron-right ms-1"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="rounded-circle bg-soft-info p-3 me-3 text-info">
+                    <i class="fas fa-pills fa-2x"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-0">Medicines</h6>
+                    <h4 class="fw-bold mb-0">{{ stats.total_medicines }} <small class="text-muted fs-6">Stock items</small></h4>
+                </div>
+            </div>
+            <div class="card-footer bg-white border-top-0 pb-3">
+                <a href="{{ url_for('admin.manage_medicines') }}" class="small text-info text-decoration-none">Inventory View <i class="fas fa-chevron-right ms-1"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="rounded-circle bg-soft-success p-3 me-3 text-success">
+                    <i class="fas fa-ambulance fa-2x"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-0">Ambulances</h6>
+                    <h4 class="fw-bold mb-0">{{ stats.available_ambulances }} / {{ stats.total_ambulances }} <small class="text-success fs-6">On Call</small></h4>
+                </div>
+            </div>
+            <div class="card-footer bg-white border-top-0 pb-3">
+                <a href="{{ url_for('admin.manage_ambulances') }}" class="small text-success text-decoration-none">Fleet Control <i class="fas fa-chevron-right ms-1"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white py-3 border-0">
+                <h5 class="fw-bold mb-0">Recent User Registrations</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Date Joined</th>
+                                <th class="text-end pe-4">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in recent_users %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold">{{ user.full_name }}</div>
+                                </td>
+                                <td>{{ user.email }}</td>
+                                <td><span class="badge rounded-pill bg-light text-dark fw-normal border">{{ user.role|capitalize }}</span></td>
+                                <td class="text-muted small">{{ user.created_at.strftime('%d %b, %Y') }}</td>
+                                <td class="text-end pe-4">
+                                    <span class="badge bg-soft-success px-2 py-1">Active</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-white border-top-0 text-center py-3">
+                <a href="{{ url_for('admin.list_users') }}" class="btn btn-sm btn-outline-secondary px-4">View All Users</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white py-3 border-0">
+                <h5 class="fw-bold mb-0">System Notifications</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex mb-3 pb-3 border-bottom">
+                    <div class="text-danger me-3 fs-3"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Low Stock: Paracetamol</h6>
+                        <small class="text-muted">Stock level below 50 units. Reorder soon.</small>
+                    </div>
+                </div>
+                <div class="d-flex mb-3 pb-3 border-bottom">
+                    <div class="text-primary me-3 fs-3"><i class="fas fa-info-circle"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Backup Successful</h6>
+                        <small class="text-muted">System database backup completed at 02:00 AM.</small>
+                    </div>
+                </div>
+                <div class="d-flex">
+                    <div class="text-warning me-3 fs-3"><i class="fas fa-clock"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Pending Approval: Dr. Williams</h6>
+                        <small class="text-muted">New doctor registration needs verification.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .bg-soft-primary { background: rgba(13, 110, 253, 0.1); }
+    .bg-soft-info { background: rgba(13, 202, 240, 0.1); }
+    .bg-soft-success { background: rgba(25, 135, 84, 0.1); }
+</style>
 {% endblock %}

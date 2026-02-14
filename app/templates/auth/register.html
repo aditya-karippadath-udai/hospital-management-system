@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5" x-data="{ role: 'patient' }">
+    <div class="col-md-8 col-lg-6">
+        <div class="card p-4">
+            <div class="text-center mb-4">
+                <div class="bg-soft-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <i class="bi bi-person-plus-fill fs-3"></i>
+                </div>
+                <h2 class="h4 fw-bold">Create an Account</h2>
+                <p class="text-muted small">Join our health network today</p>
+            </div>
+            
+            <form action="{{ url_for('auth.register') }}" method="POST">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label for="first_name" class="form-label small fw-semibold">First Name</label>
+                        <input type="text" class="form-control bg-light border-0" id="first_name" name="first_name" placeholder="John" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="last_name" class="form-label small fw-semibold">Last Name</label>
+                        <input type="text" class="form-control bg-light border-0" id="last_name" name="last_name" placeholder="Doe" required>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="username" class="form-label small fw-semibold">Username</label>
+                    <input type="text" class="form-control bg-light border-0" id="username" name="username" placeholder="johndoe123" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="email" class="form-label small fw-semibold">Email Address</label>
+                    <input type="email" class="form-control bg-light border-0" id="email" name="email" placeholder="john@example.com" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="password" class="form-label small fw-semibold">Password</label>
+                    <input type="password" class="form-control bg-light border-0" id="password" name="password" placeholder="••••••••" required>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label small fw-semibold">I am a...</label>
+                    <div class="d-flex gap-3">
+                        <div class="form-check border rounded p-2 flex-fill text-center" :class="role === 'patient' ? 'bg-soft-primary border-primary' : 'bg-light'">
+                            <input class="form-check-input d-none" type="radio" name="role" id="role_patient" value="patient" x-model="role" checked>
+                            <label class="form-check-label d-block cursor-pointer" for="role_patient">
+                                <i class="bi bi-person h4 d-block mb-1"></i>
+                                Patient
+                            </label>
+                        </div>
+                        <div class="form-check border rounded p-2 flex-fill text-center" :class="role === 'doctor' ? 'bg-soft-primary border-primary' : 'bg-light'">
+                            <input class="form-check-input d-none" type="radio" name="role" id="role_doctor" value="doctor" x-model="role">
+                            <label class="form-check-label d-block cursor-pointer" for="role_doctor">
+                                <i class="bi bi-person-badge h4 d-block mb-1"></i>
+                                Doctor
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Doctor Specific Fields -->
+                <div x-show="role === 'doctor'" x-transition class="mb-4 p-3 border rounded bg-light">
+                    <h6 class="fw-bold mb-3 small">Medical Credentials</h6>
+                    <div class="mb-3">
+                        <label for="specialization" class="form-label small fw-semibold">Specialization</label>
+                        <input type="text" class="form-control border-0" id="specialization" name="specialization" placeholder="e.g. Cardiology">
+                    </div>
+                    <div class="mb-0">
+                        <label for="license_number" class="form-label small fw-semibold">License Number</label>
+                        <input type="text" class="form-control border-0" id="license_number" name="license_number" placeholder="MED-123456">
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100 mb-3">
+                    Register Now
+                </button>
+            </form>
+            
+            <div class="text-center mt-3">
+                <p class="small text-muted mb-0">Already have an account? <a href="{{ url_for('auth.login') }}" class="fw-bold text-decoration-none">Sign In</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .cursor-pointer { cursor: pointer; }
+</style>
+{% endblock %}

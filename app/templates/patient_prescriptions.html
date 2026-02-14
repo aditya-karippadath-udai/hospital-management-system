@@ -1,0 +1,66 @@
+{% extends "base_patient.html" %}
+
+{% block title %}My Prescriptions{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2 class="fw-bold">Medical Records & Prescriptions</h2>
+        <p class="text-muted">Access your digital prescriptions and medical history.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% if prescriptions %}
+        {% for prescription in prescriptions %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm border-start border-4 border-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h6 class="text-muted small mb-1">Prescribed By</h6>
+                            <h5 class="fw-bold mb-0">Dr. {{ prescription.doctor.user.full_name }}</h5>
+                            <small class="text-muted">{{ prescription.created_at.strftime('%d %b, %Y') }}</small>
+                        </div>
+                        <i class="fas fa-file-prescription fa-2x text-warning opacity-25"></i>
+                    </div>
+                    
+                    <div class="bg-light p-3 rounded mb-3">
+                        <h6 class="fw-bold small text-uppercase text-muted">Diagnosis</h6>
+                        <p class="mb-0">{{ prescription.diagnosis or 'Routine Checkup' }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6 class="fw-bold small text-uppercase text-muted">Medicines</h6>
+                        <ul class="list-unstyled mb-0">
+                            {% if prescription.medicines and prescription.medicines is iterable %}
+                                {% for med in prescription.medicines %}
+                                <li class="mb-1">
+                                    <i class="fas fa-capsules me-2 text-warning"></i>
+                                    <strong>{{ med.name }}</strong> - {{ med.dosage }} ({{ med.frequency }})
+                                </li>
+                                {% endfor %}
+                            {% else %}
+                                <p class="small text-muted mb-0">{{ prescription.medicine_details or 'Specific details not listed' }}</p>
+                            {% endif %}
+                        </ul>
+                    </div>
+
+                    <div class="mt-auto pt-3 border-top d-flex justify-content-between">
+                        <button class="btn btn-sm btn-link text-decoration-none px-0"><i class="fas fa-download me-1"></i> PDF</button>
+                        <button class="btn btn-sm btn-link text-decoration-none px-0">View Full Detail</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12 text-center py-5">
+            <div class="mb-3">
+                <i class="fas fa-notes-medical fa-4x text-muted opacity-25"></i>
+            </div>
+            <p class="text-muted">No prescriptions found in your medical history.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

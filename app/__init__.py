@@ -22,6 +22,14 @@ def create_app(config_name=None):
     migrate.init_app(app, db)
     jwt.init_app(app)
     
+    from app.extensions import login_manager
+    login_manager.init_app(app)
+    
+    @login_manager.user_loader
+    def load_user(user_id):
+        from app.models.user import User
+        return User.query.get(int(user_id))
+    
     # Import models to ensure they are registered with SQLAlchemy
     from app import models
     
@@ -31,10 +39,15 @@ def create_app(config_name=None):
     # Register error handlers
     register_error_handlers(app)
     
+    # Run seeding logic within app context
+    with app.app_context():
+        from app.utils.seed import seed_admin
+        seed_admin()
+    
     # Add root redirect
     @app.route('/')
     def index():
-        return redirect(url_for('auth.home'))
+        return redirect(url_for('auth.login'))
     
     return app
 
@@ -57,14 +70,20 @@ def register_blueprints(app):
 def register_error_handlers(app):
     """Register error handlers"""
     
+    @app.errorhandler(403)
+    def forbidden(error):
+        if request.path.startswith('/api'):
+            return jsonify({'error': 'Forbidden', 'message': 'You do not have permission to access this resource'}), 403
+        return render_template('errors/403.html'), 403
+
     @app.errorhandler(404)
     def not_found(error):
         if request.path.startswith('/api'):
             return jsonify({'error': 'Not found', 'message': 'Resource not found'}), 404
-        return render_template('login.html'), 404
+        return render_template('errors/404.html'), 404
     
     @app.errorhandler(500)
     def internal_server_error(error):
         if request.path.startswith('/api'):
             return jsonify({'error': 'Internal server error'}), 500
-        return "Internal Server Error", 500
+        return render_template('errors/500.html'), 500

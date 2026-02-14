@@ -60,6 +60,7 @@ class Appointment(db.Model):
         Index('idx_appointment_doctor_date', 'doctor_id', 'appointment_date'),
         Index('idx_appointment_patient_date', 'patient_id', 'appointment_date'),
         Index('idx_appointment_date_status', 'appointment_date', 'status'),
+        Index('idx_appointment_collision', 'doctor_id', 'appointment_date', 'appointment_time', unique=True),
     )
     
     def generate_appointment_number(self):

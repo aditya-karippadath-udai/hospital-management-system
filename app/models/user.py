@@ -1,9 +1,9 @@
 from app.extensions import db
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 
-
-class User(db.Model):
+class User(db.Model, UserMixin):
     """User model for authentication and authorization"""
     __tablename__ = 'users'
     

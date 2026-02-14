@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Patient History - {{ patient.user.full_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ url_for('doctor.dashboard') }}" class="text-decoration-none">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Patient History</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold mb-0">Medical History: {{ patient.user.full_name }}</h2>
+        </div>
+        <a href="{{ url_for('doctor.incoming_appointments') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-2"></i>Back to Appointments
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Patient Info Card -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="avatar-lg bg-soft-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <span class="fs-2 fw-bold text-primary">{{ patient.user.first_name[0] }}{{ patient.user.last_name[0] }}</span>
+                        </div>
+                        <h4 class="mb-1 fw-bold">{{ patient.user.full_name }}</h4>
+                        <span class="badge bg-soft-info text-info rounded-pill px-3">Patient ID: #{{ patient.id }}</span>
+                    </div>
+
+                    <div class="border-top pt-4">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="text-muted small d-block">Age</label>
+                                <span class="fw-semibold">{{ patient.age or 'N/A' }} Years</span>
+                            </div>
+                            <div class="col-6">
+                                <label class="text-muted small d-block">Gender</label>
+                                <span class="fw-semibold text-capitalize">{{ patient.gender or 'N/A' }}</span>
+                            </div>
+                            <div class="col-6">
+                                <label class="text-muted small d-block">Blood Group</label>
+                                <span class="fw-semibold text-danger">{{ patient.blood_group or 'N/A' }}</span>
+                            </div>
+                            <div class="col-6">
+                                <label class="text-muted small d-block">BMI</label>
+                                <span class="fw-semibold text-success">{{ patient.bmi or 'N/A' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <label class="text-muted small d-block mb-2">Emergency Contact</label>
+                        <div class="bg-light p-3 rounded-3">
+                            <p class="mb-1 fw-bold small text-dark">{{ patient.emergency_contact_name or 'Not Set' }}</p>
+                            <p class="mb-0 small text-muted"><i class="bi bi-telephone text-primary me-2"></i>{{ patient.emergency_contact_phone or 'N/A' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Appointment Timeline -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-transparent border-0 p-4">
+                    <h5 class="fw-bold mb-0">Consultation Timeline</h5>
+                </div>
+                <div class="card-body p-4 pt-0">
+                    {% if history %}
+                        <div class="timeline">
+                            {% for appt in history %}
+                                <div class="timeline-item pb-4 position-relative">
+                                    <div class="timeline-marker bg-primary position-absolute rounded-circle" style="width: 12px; height: 12px; left: -6px; top: 5px; z-index: 1;"></div>
+                                    <div class="ms-4 border-start ps-4" style="border-width: 2px !important;">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <span class="text-muted small">{{ appt.appointment_date.strftime('%B %d, %Y') }} at {{ appt.appointment_time.strftime('%I:%M %p') }}</span>
+                                                <h6 class="fw-bold mt-1 mb-0">{{ appt.reason }}</h6>
+                                            </div>
+                                            <span class="badge {% if appt.status == 'completed' %}bg-soft-success text-success{% elif appt.status == 'cancelled' %}bg-soft-danger text-danger{% else %}bg-soft-warning text-warning{% endif %} rounded-pill">
+                                                {{ appt.status|capitalize }}
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="bg-light p-3 rounded-3 mb-3">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label class="text-muted x-small fw-bold text-uppercase">Diagnosis</label>
+                                                    <p class="small mb-0">{{ appt.diagnosis or 'No diagnosis recorded' }}</p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="text-muted x-small fw-bold text-uppercase">Prescribed By</label>
+                                                    <p class="small mb-0">Dr. {{ appt.doctor.user.full_name }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {% if appt.prescription %}
+                                            <div class="border rounded-3 p-3">
+                                                <label class="text-muted x-small fw-bold text-uppercase mb-2">Prescription</label>
+                                                <div class="table-responsive">
+                                                    <table class="table table-sm table-borderless mb-0">
+                                                        <thead class="x-small text-muted">
+                                                            <tr>
+                                                                <th>Medicine</th>
+                                                                <th>Dosage</th>
+                                                                <th>Frequency</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody class="small">
+                                                            {% for med in appt.prescription.medicines %}
+                                                                <tr class="border-top-0">
+                                                                    <td>{{ med.name }}</td>
+                                                                    <td>{{ med.dosage }}</td>
+                                                                    <td>{{ med.frequency }}</td>
+                                                                </tr>
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-calendar-x text-muted display-4"></i>
+                            <p class="text-muted mt-3">No medical history found for this patient.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline-item:last-child .ms-4 {
+    border-left: none !important;
+}
+</style>
+{% endblock %}

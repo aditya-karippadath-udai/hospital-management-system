@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 fw-bold mb-0">Admin Dashboard</h1>
+        <p class="text-muted small mb-0">Overview of hospital operations and staff management</p>
+    </div>
+    <div class="text-end">
+        <div class="text-muted mb-1" style="font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">System Status: <span class="text-success"><i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i> Online</span></div>
+        <div class="text-muted small">
+            <i class="bi bi-calendar3 me-1"></i> {{ now.strftime('%d %b, %Y') if now else 'Today' }}
+        </div>
+    </div>
+</div>
+
+<!-- Critical Notifications -->
+{% if stats.pending_doctor_approvals > 0 %}
+<div class="alert bg-soft-warning border-0 d-flex align-items-center mb-4 p-3 fade show" role="alert">
+    <div class="stat-icon bg-warning text-white mb-0 me-3" style="width: 40px; height: 40px; font-size: 1.2rem;">
+        <i class="bi bi-person-exclamation"></i>
+    </div>
+    <div class="flex-grow-1">
+        <h6 class="fw-bold mb-0">Pending Approvals</h6>
+        <p class="x-small text-muted mb-0">There are <strong>{{ stats.pending_doctor_approvals }}</strong> doctor registrations waiting for your review.</p>
+    </div>
+    <a href="{{ url_for('admin.list_doctors') }}" class="btn btn-warning btn-sm fw-bold px-3 ms-3">Review Now</a>
+    <button type="button" class="btn-close ms-2" data-bs-dismiss="alert"></button>
+</div>
+{% endif %}
+
+<!-- Core Stats Row -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card p-3 border-start border-primary border-4">
+            <div class="stat-icon bg-soft-primary">
+                <i class="bi bi-people"></i>
+            </div>
+            <h6 class="text-muted small fw-semibold uppercase">Total Users</h6>
+            <h3 class="fw-bold mb-0">{{ stats.total_users }}</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3 border-start border-success border-4">
+            <div class="stat-icon bg-soft-success">
+                <i class="bi bi-person-badge"></i>
+            </div>
+            <h6 class="text-muted small fw-semibold uppercase">Doctors</h6>
+            <h3 class="fw-bold mb-0">{{ stats.total_doctors }}</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3 border-start border-warning border-4">
+            <div class="stat-icon bg-soft-warning">
+                <i class="bi bi-hospital"></i>
+            </div>
+            <h6 class="text-muted small fw-semibold uppercase">Patients</h6>
+            <h3 class="fw-bold mb-0">{{ stats.total_patients }}</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3 border-start border-danger border-4">
+            <div class="stat-icon bg-soft-danger">
+                <i class="bi bi-calendar2-check"></i>
+            </div>
+            <h6 class="text-muted small fw-semibold uppercase">Appointments</h6>
+            <h3 class="fw-bold mb-0">{{ stats.total_appointments }}</h3>
+        </div>
+    </div>
+</div>
+
+<!-- Secondary Stats Row (Resources) -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card p-3 bg-white">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon bg-soft-info me-3 mb-0">
+                    <i class="bi bi-hospital-fill"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted small fw-semibold uppercase mb-1">Beds Overview</h6>
+                    <div class="d-flex align-items-baseline gap-2">
+                        <h4 class="fw-bold mb-0 text-dark">{{ stats.available_beds }}</h4>
+                        <span class="text-muted small">/ {{ stats.total_beds }} Available</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3 bg-white">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon {% if stats.low_stock_medicines > 0 %}bg-soft-danger animate-pulse{% else %}bg-soft-success{% endif %} me-3 mb-0">
+                    <i class="bi bi-capsule"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted small fw-semibold uppercase mb-1">Pharmacy</h6>
+                    <div class="d-flex align-items-baseline gap-2">
+                        <h4 class="fw-bold mb-0 {% if stats.low_stock_medicines > 0 %}text-danger{% else %}text-dark{% endif %}">{{ stats.total_medicines }}</h4>
+                        {% if stats.low_stock_medicines > 0 %}
+                            <span class="badge bg-danger rounded-pill x-small">{{ stats.low_stock_medicines }} Low Stock</span>
+                        {% else %}
+                            <span class="text-muted small">Items in inventory</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3 bg-white">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon bg-soft-dark me-3 mb-0">
+                    <i class="bi bi-truck-front"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted small fw-semibold uppercase mb-1">Ambulance Fleet</h6>
+                    <div class="d-flex align-items-baseline gap-2">
+                        <h4 class="fw-bold mb-0 text-dark">{{ stats.available_ambulances }}</h4>
+                        <span class="text-muted small">/ {{ stats.total_ambulances }} Available</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Recent Users -->
+    <div class="col-lg-8">
+        <div class="table-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0">Recently Joined Users</h5>
+                <a href="{{ url_for('admin.list_users') }}" class="btn btn-sm btn-light">View All</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Joined</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in recent_users %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="bg-soft-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                        <i class="bi bi-person smaller"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">{{ user.username }}</div>
+                                        <div class="text-muted x-small">{{ user.email }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge {% if user.role == 'admin' %}bg-soft-danger{% elif user.role == 'doctor' %}bg-soft-primary{% else %}bg-soft-success{% endif %}">
+                                    {{ user.role | capitalize }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if user.is_active %}
+                                    <span class="text-success small"><i class="bi bi-check-circle-fill me-1"></i> Active</span>
+                                {% else %}
+                                    <span class="text-danger small"><i class="bi bi-x-circle-fill me-1"></i> Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-muted small">{{ user.created_at.strftime('%d %b, %Y') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Resource Quick Actions -->
+    <div class="col-lg-4">
+        <div class="card p-4 h-100">
+            <h5 class="fw-bold mb-4">Internal Resources</h5>
+            <div class="d-grid gap-3">
+                <a href="{{ url_for('admin.manage_beds') }}" class="btn btn-light text-start p-3 border-0 bg-soft-primary d-flex align-items-center gap-3">
+                    <i class="bi bi-hospital h4 mb-0"></i>
+                    <div>
+                        <div class="fw-bold small">Manage Beds</div>
+                        <div class="x-small text-muted">Ward occupancy and allocation</div>
+                    </div>
+                </a>
+                <a href="{{ url_for('admin.manage_medicines') }}" class="btn btn-light text-start p-3 border-0 bg-soft-success d-flex align-items-center gap-3">
+                    <i class="bi bi-capsule h4 mb-0"></i>
+                    <div>
+                        <div class="fw-bold small">Pharmacy Stock</div>
+                        <div class="x-small text-muted">Inventory and low stock alerts</div>
+                    </div>
+                </a>
+                <a href="{{ url_for('admin.manage_ambulances') }}" class="btn btn-light text-start p-3 border-0 bg-soft-warning d-flex align-items-center gap-3">
+                    <i class="bi bi-truck-front h4 mb-0"></i>
+                    <div>
+                        <div class="fw-bold small">Ambulance Fleet</div>
+                        <div class="x-small text-muted">Vehicle status and availability</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .smaller { font-size: 0.85rem; }
+    .x-small { font-size: 0.75rem; }
+    .uppercase { text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.05em; font-weight: 700; }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.05); opacity: 0.8; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pulse {
+        animation: pulse 2s infinite ease-in-out;
+    }
+    .bg-soft-dark { background-color: #f1f5f9; color: #334155; }
+    .bg-soft-info { background-color: #ecfeff; color: #0891b2; }
+</style>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base_doctor.html" %}
+
+{% block title %}Manage Availability{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-info text-white py-3">
+                <h5 class="fw-bold mb-0"><i class="fas fa-clock me-2"></i> Working Hours & Availability</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="mb-4 pb-3 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="fw-bold mb-1">Online Status</h5>
+                                <p class="text-muted small mb-0">Toggle your visibility to patients for booking consultations.</p>
+                            </div>
+                            <div class="form-check form-switch fs-4">
+                                <input class="form-check-input" type="checkbox" name="is_available" role="switch" id="is_available" {% if doctor.is_available %}checked{% endif %}>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6 text-center">
+                            <label class="form-label fw-bold">Consultation Start Time</label>
+                            <input type="time" name="available_time_start" class="form-control text-center fs-5 shadow-sm" value="{{ doctor.available_time_start.strftime('%H:%M') if doctor.available_time_start else '09:00' }}">
+                        </div>
+                        <div class="col-md-6 text-center">
+                            <label class="form-label fw-bold">Consultation End Time</label>
+                            <input type="time" name="available_time_end" class="form-control text-center fs-5 shadow-sm" value="{{ doctor.available_time_end.strftime('%H:%M') if doctor.available_time_end else '17:00' }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold d-block">Available Days</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% set days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] %}
+                            {% for day in days %}
+                            <div class="flex-grow-1">
+                                <input type="checkbox" class="btn-check" name="available_days[]" value="{{ day }}" id="btn-{{ day }}" {% if day in doctor.available_days %}checked{% endif %}>
+                                <label class="btn btn-outline-primary w-100" for="btn-{{ day }}">{{ day[:3] }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Consultation Fee ($)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" name="consultation_fee" class="form-control" value="{{ doctor.consultation_fee or 0 }}" step="0.01">
+                        </div>
+                    </div>
+
+                    <div class="d-grid shadow-sm">
+                        <button type="submit" class="btn btn-info text-white py-2 fw-bold">Save Settings</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

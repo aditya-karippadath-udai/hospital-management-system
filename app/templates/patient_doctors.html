@@ -1,0 +1,92 @@
+{% extends "base_patient.html" %}
+
+{% block title %}Find Doctors{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold">Our Medical Specialists</h2>
+            <p class="text-muted">Find the right specialist for your health needs.</p>
+        </div>
+        <form class="d-flex" method="GET">
+            <select name="specialization" class="form-select me-2" onchange="this.form.submit()">
+                <option value="">All Specializations</option>
+                {% set specs = ["Cardiology", "Neurology", "Orthepedics", "Pediatrics", "Dermatology", "General Medicine"] %}
+                {% for spec in specs %}
+                    <option value="{{ spec }}" {% if request.args.get('specialization') == spec %}selected{% endif %}>{{ spec }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% if doctors %}
+        {% for doctor in doctors %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
+                            <i class="fas fa-user-md fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0">Dr. {{ doctor.user.full_name }}</h5>
+                            <span class="badge bg-soft-info text-info border border-info px-2 py-1">{{ doctor.specialization }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <small class="text-muted d-block">Experience</small>
+                            <span class="fw-bold">{{ doctor.experience_years }} Years</span>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted d-block">Rating</small>
+                            <span class="text-warning">
+                                {% set avg = doctor.average_rating|round|int %}
+                                {% for i in range(5) %}
+                                    <i class="{% if i < avg %}fas{% else %}far{% endif %} fa-star"></i>
+                                {% endfor %}
+                                <small class="text-muted">({{ doctor.average_rating }})</small>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-2 bg-light rounded">
+                        <div>
+                            <small class="text-muted d-block">Fee</small>
+                            <span class="fw-bold text-success">${{ doctor.consultation_fee }}</span>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted d-block">Status</small>
+                            {% if doctor.is_available %}
+                                <span class="badge bg-success">Available Today</span>
+                            {% else %}
+                                <span class="badge bg-danger">Not Available</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('patient.doctor_profile', doctor_id=doctor.id) }}" class="btn btn-outline-primary">View Profile</a>
+                        <a href="/patient/book/{{ doctor.id }}" class="btn btn-primary {% if not doctor.is_available %}disabled{% endif %}">Book Appointment</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12 text-center py-5">
+            <p class="text-muted">No doctors found matching your criteria.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .bg-soft-info { background-color: rgba(13, 202, 240, 0.1); }
+</style>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends "base_doctor.html" %}
+
+{% block title %}Create Prescription{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-primary text-white py-3">
+                <h5 class="fw-bold mb-0"><i class="fas fa-file-prescription me-2"></i> Create Prescription</h5>
+            </div>
+            <div class="card-body p-4">
+                <!-- Patient Brief -->
+                <div class="row mb-4 p-3 bg-light rounded-3">
+                    <div class="col-md-6 border-end">
+                        <small class="text-muted text-uppercase fw-bold">Patient Details</small>
+                        <h5 class="fw-bold my-1">{{ appointment.patient.user.full_name }}</h5>
+                        <p class="text-muted mb-0">{{ appointment.patient.gender }}, {{ appointment.patient.age }} Years | Blood: {{ appointment.patient.blood_group }}</p>
+                    </div>
+                    <div class="col-md-6 ps-4">
+                        <small class="text-muted text-uppercase fw-bold">Appointment Reason</small>
+                        <p class="fw-medium my-1">{{ appointment.reason }}</p>
+                    </div>
+                </div>
+
+                <form method="POST">
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">Diagnosis</label>
+                            <input type="text" name="diagnosis" class="form-control" placeholder="e.g. Viral Fever, Hypertension" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Symptoms Observed</label>
+                            <textarea name="symptoms" class="form-control" rows="3" placeholder="Describe clinical findings"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Clinical Notes</label>
+                            <textarea name="clinical_notes" class="form-control" rows="3" placeholder="Internal notes or observations"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold m-0 text-primary">Medications</h5>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="addMedicine">
+                                <i class="fas fa-plus me-1"></i> Add Medicine
+                            </button>
+                        </div>
+                        
+                        <div id="medicineRows">
+                            <div class="row g-2 mb-2 medicine-row">
+                                <div class="col-md-4">
+                                    <input type="text" name="med_name[]" class="form-control" placeholder="Medicine Name" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" name="med_dosage[]" class="form-control" placeholder="Dosage (e.g. 500mg)" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" name="med_freq[]" class="form-control" placeholder="Freq (e.g. 1-0-1)" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-outline-danger w-100 remove-row"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">General Advice & Instructions</label>
+                        <textarea name="advice" class="form-control" rows="2" placeholder="Dietary advice, rest, follow-up, etc."></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg shadow-sm">Save Prescription & Complete Appointment</button>
+                        <a href="{{ url_for('doctor.incoming_appointments') }}" class="btn btn-link text-muted">Go Back</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('addMedicine').addEventListener('click', function() {
+        const row = document.querySelector('.medicine-row').cloneNode(true);
+        row.querySelectorAll('input').forEach(input => input.value = '');
+        document.getElementById('medicineRows').appendChild(row);
+    });
+
+    document.addEventListener('click', function(e) {
+        if(e.target.closest('.remove-row')) {
+            const rows = document.querySelectorAll('.medicine-row');
+            if(rows.length > 1) {
+                e.target.closest('.medicine-row').remove();
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,50 +1,69 @@
-from flask import Blueprint, request, jsonify, flash, redirect, url_for
+from flask import Blueprint, request, jsonify, session
 from app.services.appointment_service import AppointmentService
+from app.services.prescription_service import PrescriptionService
 from app.utils.decorators import login_required, role_required
 
 appointment_bp = Blueprint('appointment', __name__)
 
 @appointment_bp.route('/', methods=['POST'])
-@login_required
+@role_required(['patient'])
 def create_appointment():
-    """Create a new appointment (supports Form and JSON)"""
-    if request.is_json:
-        data = request.get_json()
-    else:
-        data = request.form.to_dict()
-        
+    """Book appointment with strict validation"""
+    data = request.get_json() if request.is_json else request.form.to_dict()
+    
+    # Ensure patient_id is linked to the current user
+    from app.models.patient import Patient
+    patient = Patient.query.filter_by(user_id=session.get('user_id')).first()
+    data['patient_id'] = patient.id
+
     try:
         appointment = AppointmentService.create_appointment(data)
-        if request.is_json:
-            return jsonify({'message': 'Appointment created', 'appointment': appointment.to_dict()}), 201
-        flash('Appointment booked successfully!', 'success')
-        return redirect(url_for('patient.dashboard'))
+        return jsonify({'message': 'Appointment requested', 'appointment': appointment.to_dict()}), 201
     except Exception as e:
-        if request.is_json:
-            return jsonify({'error': str(e)}), 400
-        flash(f'Error: {str(e)}', 'danger')
-        return redirect(url_for('patient.dashboard'))
+        return jsonify({'error': str(e)}), 400
 
-@appointment_bp.route('/doctor/<int:doctor_id>/slots')
-@login_required
-def get_slots(doctor_id):
-    date_str = request.args.get('date')
-    if not date_str:
-        return jsonify({'error': 'Date is required'}), 400
+@appointment_bp.route('/<int:appointment_id>', methods=['PATCH'])
+@role_required(['doctor', 'admin'])
+def update_status(appointment_id):
+    """Approve, Reject, or Complete appointment"""
+    data = request.get_json()
+    status = data.get('status')
+    user_role = session.get('user_role')
     
-    slots = AppointmentService.get_available_slots(doctor_id, date_str)
-    return jsonify({'available_slots': slots}), 200
-
-@appointment_bp.route('/<int:appointment_id>/cancel', methods=['POST'])
-@login_required
-def cancel_appointment(appointment_id):
-    """Cancel appointment"""
-    reason = request.json.get('reason') if request.is_json else request.form.get('reason')
     try:
-        AppointmentService.update_appointment_status(appointment_id, 'cancelled', reason)
-        if request.is_json:
-            return jsonify({'message': 'Appointment cancelled'}), 200
-        flash('Appointment cancelled', 'info')
-        return redirect(request.referrer or url_for('auth.home'))
+        appointment = AppointmentService.update_appointment_status(
+            appointment_id=appointment_id,
+            status=status,
+            user_role=user_role,
+            **data
+        )
+        return jsonify({'message': f'Status updated to {status}', 'appointment': appointment.to_dict()}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+@appointment_bp.route('/<int:appointment_id>', methods=['DELETE'])
+@role_required(['patient'])
+def cancel_appointment(appointment_id):
+    """Cancel pending appointment"""
+    user_role = session.get('user_role')
+    try:
+        AppointmentService.update_appointment_status(
+            appointment_id=appointment_id,
+            status='cancelled',
+            user_role=user_role,
+            cancellation_reason=request.args.get('reason', 'Cancelled by patient')
+        )
+        return jsonify({'message': 'Appointment cancelled'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+@appointment_bp.route('/prescribe', methods=['POST'])
+@role_required(['doctor'])
+def create_prescription():
+    """Create prescription for an appointment"""
+    data = request.get_json()
+    try:
+        prescription = PrescriptionService.create_prescription(data)
+        return jsonify({'message': 'Prescription created', 'prescription': prescription.to_dict()}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 400

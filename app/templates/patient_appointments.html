@@ -1,0 +1,76 @@
+{% extends "base_patient.html" %}
+
+{% block title %}My Appointments{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2 class="fw-bold">My Appointments</h2>
+        <p class="text-muted">Track and manage your medical consultations.</p>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 py-3">Ref ID</th>
+                        <th class="py-3">Doctor</th>
+                        <th class="py-3">Date & Time</th>
+                        <th class="py-3 text-center">Status</th>
+                        <th class="py-3 text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if appointments %}
+                        {% for appt in appointments %}
+                        <tr>
+                            <td class="ps-4"><code class="text-muted">#{{ appt.id }}</code></td>
+                            <td>
+                                <div class="fw-bold">Dr. {{ appt.doctor.user.full_name }}</div>
+                                <small class="text-muted">{{ appt.doctor.specialization }}</small>
+                            </td>
+                            <td>
+                                <div><i class="far fa-calendar-alt me-1 text-muted"></i> {{ appt.appointment_date.strftime('%d %b, %Y') }}</div>
+                                <small class="text-muted"><i class="far fa-clock me-1"></i> {{ appt.appointment_time.strftime('%I:%M %p') }}</small>
+                            </td>
+                            <td class="text-center">
+                                {% set status_class = 'warning' if appt.status == 'pending' 
+                                                else 'success' if appt.status == 'approved' 
+                                                else 'info' if appt.status == 'completed' 
+                                                else 'danger' %}
+                                <span class="badge rounded-pill bg-{{ status_class }}">{{ appt.status|capitalize }}</span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-outline-primary"><i class="far fa-eye"></i></button>
+                                    {% if appt.status == 'pending' %}
+                                    <form action="{{ url_for('patient.cancel_appointment', appointment_id=appt.id) }}" method="POST" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to cancel this appointment?')">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                    {% if appt.status == 'completed' %}
+                                    <button class="btn btn-sm btn-outline-warning" title="Rate Doctor"><i class="fas fa-star"></i></button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <p class="text-muted mb-0">No appointments found.</p>
+                                <a href="{{ url_for('patient.list_doctors') }}" class="btn btn-link">Book your first appointment</a>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

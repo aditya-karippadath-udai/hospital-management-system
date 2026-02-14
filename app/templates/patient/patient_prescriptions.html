@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}My Prescriptions{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 fw-bold mb-0">Medical History</h1>
+        <p class="text-muted small mb-0">Access your digital prescriptions and treatment records</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% if prescriptions %}
+        {% for prescription in prescriptions %}
+        <div class="col-lg-6">
+            <div class="card p-0 border-0 overflow-hidden">
+                <div class="bg-soft-primary p-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fw-bold h6 mb-0">Dr. {{ prescription.appointment.doctor.user.last_name }}</div>
+                        <div class="x-small text-muted">{{ prescription.appointment.appointment_date.strftime('%B %d, %Y') }}</div>
+                    </div>
+                    <div class="bg-white px-2 py-1 rounded small fw-bold">#RX-{{ prescription.id }}</div>
+                </div>
+                <div class="p-3">
+                    <div class="mb-3">
+                        <div class="x-small fw-bold uppercase text-muted mb-1">Diagnosis</div>
+                        <p class="small mb-0">{{ prescription.diagnosis }}</p>
+                    </div>
+                    
+                    <div class="mb-3 bg-light p-2 rounded">
+                        <div class="x-small fw-bold uppercase text-muted mb-2">Medications</div>
+                        <ul class="list-unstyled mb-0">
+                            {% for med in prescription.medicines %}
+                            <li class="small mb-1 d-flex justify-content-between">
+                                <span><i class="bi bi-capsule me-2"></i><strong>{{ med.name }}</strong></span>
+                                <span class="text-muted">{{ med.dosage }} | {{ med.frequency }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    {% if prescription.advice %}
+                    <div class="mb-0">
+                        <div class="x-small fw-bold uppercase text-muted mb-1">Doctor's Advice</div>
+                        <p class="small text-muted font-italic mb-0">"{{ prescription.advice }}"</p>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-white border-0 text-end py-2">
+                    <button class="btn btn-sm btn-light text-primary fw-bold" onclick="window.print()">
+                        <i class="bi bi-printer me-1"></i> Print RX
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-file-earmark-medical d-block h1 text-muted mb-3"></i>
+            <p class="text-muted">No medical history found yet.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

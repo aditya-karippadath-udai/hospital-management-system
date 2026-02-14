@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Control Panel{% endblock %} - HMS</title>
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f4f7f6; display: flex; min-height: 100vh; overflow-x: hidden; }
+        #sidebar { min-width: 250px; max-width: 250px; background: #2c3e50; color: #fff; transition: all 0.3s; }
+        #sidebar .sidebar-header { padding: 20px; background: #1a252f; }
+        #sidebar ul.components { padding: 20px 0; border-bottom: 1px solid #47748b; }
+        #sidebar ul li a { padding: 12px 20px; font-size: 1.1em; display: block; color: #adb5bd; text-decoration: none; }
+        #sidebar ul li a:hover, #sidebar ul li.active > a { color: #fff; background: #34495e; }
+        #sidebar ul li a i { margin-right: 10px; width: 20px; text-align: center; }
+        #content { width: 100%; padding: 20px; transition: all 0.3s; }
+        .navbar { background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        .card { border: none; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .stat-card { transition: transform 0.3s; }
+        .stat-card:hover { transform: translateY(-5px); }
+        .badge-soft-success { background: #e6fffa; color: #38b2ac; }
+        .badge-soft-danger { background: #fff5f5; color: #e53e3e; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<nav id="sidebar">
+    <div class="sidebar-header text-center">
+        <h4 class="fw-bold mb-0">HMS Admin</h4>
+    </div>
+    <ul class="list-unstyled components">
+        <li class="{% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
+            <a href="{{ url_for('admin.dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        </li>
+        <li class="{% if request.endpoint == 'admin.list_doctors' %}active{% endif %}">
+            <a href="{{ url_for('admin.list_doctors') }}"><i class="fas fa-user-md"></i> Doctors</a>
+        </li>
+        <li class="{% if request.endpoint == 'admin.list_users' %}active{% endif %}">
+            <a href="{{ url_for('admin.list_users') }}"><i class="fas fa-users"></i> Users</a>
+        </li>
+        <li class="{% if request.endpoint == 'admin.manage_beds' %}active{% endif %}">
+            <a href="{{ url_for('admin.manage_beds') }}"><i class="fas fa-bed"></i> Beds</a>
+        </li>
+        <li class="{% if request.endpoint == 'admin.manage_medicines' %}active{% endif %}">
+            <a href="{{ url_for('admin.manage_medicines') }}"><i class="fas fa-pills"></i> Pharmacy</a>
+        </li>
+        <li class="{% if request.endpoint == 'admin.manage_ambulances' %}active{% endif %}">
+            <a href="{{ url_for('admin.manage_ambulances') }}"><i class="fas fa-ambulance"></i> Ambulances</a>
+        </li>
+    </ul>
+    <div class="p-4 mt-5">
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light w-100">
+            <i class="fas fa-sign-out-alt me-2"></i>Logout
+        </a>
+    </div>
+</nav>
+
+<div id="content">
+    <nav class="navbar navbar-expand-lg navbar-light rounded">
+        <div class="container-fluid">
+            <button type="button" id="sidebarCollapse" class="btn btn-info text-white d-lg-none">
+                <i class="fas fa-align-left"></i>
+            </button>
+            <div class="ms-auto d-flex align-items-center">
+                <span class="me-3 text-muted">Signed in as <strong>{{ current_user.full_name }}</strong></span>
+                <div class="dropdown">
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=random" class="rounded-circle" width="35" height="35" data-bs-toggle="dropdown" style="cursor:pointer">
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#">Profile</a></li>
+                        <li><a class="dropdown-item" href="#">Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('sidebarCollapse')?.addEventListener('click', function() {
+        document.getElementById('sidebar').classList.toggle('active');
+    });
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>
