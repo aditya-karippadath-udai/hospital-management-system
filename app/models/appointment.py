@@ -8,7 +8,7 @@ class Appointment(db.Model):
     __tablename__ = 'appointments'
     
     id = db.Column(db.Integer, primary_key=True)
-    appointment_number = db.Column(db.String(20), unique=True, nullable=False)
+    appointment_number = db.Column(db.String(50), unique=True, nullable=False)
     
     # Foreign Keys
     doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id', ondelete='CASCADE'), nullable=False)
@@ -67,9 +67,9 @@ class Appointment(db.Model):
         """Generate unique appointment number"""
         import random
         import string
-        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-        random_str = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
-        return f"APT{timestamp}{random_str}"
+        timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+        random_str = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        return f"APT-{timestamp}-{random_str}"
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

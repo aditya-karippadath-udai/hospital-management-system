@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, render_template, request, session, abort, flash, redirect, url_for
+from datetime import datetime
 from flask_login import current_user, login_required
 from app.services.admin_service import AdminService
 from app.models.user import User
@@ -15,7 +16,11 @@ def dashboard():
     if current_user.role != 'admin': abort(403)
         
     stats = AdminService.get_dashboard_stats()
-    recent_users = User.query.order_by(User.created_at.desc()).limit(5).all()
+    try:
+        recent_users = User.query.order_by(User.created_at.desc()).limit(5).all()
+    except Exception:
+        db.session.rollback()
+        recent_users = []
     
     if request.path.startswith('/api') or request.is_json:
         return jsonify({
@@ -58,20 +63,22 @@ def manage_beds():
 @login_required
 def toggle_bed_status(bed_id):
     if current_user.role != 'admin': abort(403)
-    bed = Bed.query.get_or_404(bed_id)
-    bed.is_occupied = not bed.is_occupied
-    db.session.commit()
-    flash(f'Bed {bed.bed_number} status updated', 'success')
+    try:
+        AdminService.update_bed(bed_id, {'is_occupied': not Bed.query.get(bed_id).is_occupied})
+        flash(f'Bed status updated', 'success')
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'danger')
     return redirect(url_for('admin.manage_beds'))
 
 @admin_bp.route('/beds/<int:bed_id>/delete', methods=['POST'])
 @login_required
 def delete_bed(bed_id):
     if current_user.role != 'admin': abort(403)
-    bed = Bed.query.get_or_404(bed_id)
-    db.session.delete(bed)
-    db.session.commit()
-    flash('Bed removed', 'info')
+    try:
+        AdminService.delete_bed(bed_id)
+        flash('Bed removed', 'info')
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'danger')
     return redirect(url_for('admin.manage_beds'))
 
 @admin_bp.route('/medicines', methods=['GET', 'POST'])
@@ -86,17 +93,27 @@ def manage_medicines():
             data = {
                 'name': request.form.get('name'),
                 'stock_quantity': int(request.form.get('stock_quantity', 0)),
-                'price': float(request.form.get('price', 0)),
-                'expiry_date': datetime.strptime(request.form.get('expiry_date'), '%Y-%m-%d').date() if request.form.get('expiry_date') else None
+                'price': float(request.form.get('price', 0))
             }
             
         try:
+            # Safe date parsing
+            expiry_date = None
+            date_str = request.form.get('expiry_date')
+            if date_str:
+                try:
+                    expiry_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                except ValueError:
+                    flash('Invalid date format. Please use YYYY-MM-DD.', 'warning')
+                    return redirect(url_for('admin.manage_medicines'))
+
+            data['expiry_date'] = expiry_date
             AdminService.create_medicine(data)
             if request.is_json: return jsonify({'message': 'Medicine added'}), 201
             flash('Medicine added to inventory', 'success')
             return redirect(url_for('admin.manage_medicines'))
         except Exception as e:
-            flash(f'Error: {str(e)}', 'danger')
+            flash(f'Error adding medicine: {str(e)}', 'danger')
 
     medicines = Medicine.query.all()
     if request.is_json: return jsonify({'medicines': [m.to_dict() for m in medicines]}), 200
@@ -139,20 +156,23 @@ def manage_ambulances():
 @login_required
 def toggle_ambulance_status(ambulance_id):
     if current_user.role != 'admin': abort(403)
-    amb = Ambulance.query.get_or_404(ambulance_id)
-    amb.is_available = not amb.is_available
-    db.session.commit()
-    flash(f'Ambulance {amb.vehicle_number} status updated', 'success')
+    try:
+        amb = Ambulance.query.get_or_404(ambulance_id)
+        AdminService.update_ambulance(ambulance_id, {'is_available': not amb.is_available})
+        flash(f'Ambulance {amb.vehicle_number} status updated', 'success')
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'danger')
     return redirect(url_for('admin.manage_ambulances'))
 
 @admin_bp.route('/ambulances/<int:ambulance_id>/delete', methods=['POST'])
 @login_required
 def delete_ambulance(ambulance_id):
     if current_user.role != 'admin': abort(403)
-    amb = Ambulance.query.get_or_404(ambulance_id)
-    db.session.delete(amb)
-    db.session.commit()
-    flash('Ambulance removed', 'info')
+    try:
+        AdminService.delete_ambulance(ambulance_id)
+        flash('Ambulance removed', 'info')
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'danger')
     return redirect(url_for('admin.manage_ambulances'))
 
 @admin_bp.route('/doctors', methods=['GET'])
@@ -167,20 +187,22 @@ def list_doctors():
 @login_required
 def approve_doctor(doctor_id):
     if current_user.role != 'admin': abort(403)
-    doctor = Doctor.query.get_or_404(doctor_id)
-    doctor.user.is_active = True
-    db.session.commit()
-    flash(f'Doctor {doctor.user.full_name} approved', 'success')
+    try:
+        AdminService.approve_doctor(doctor_id)
+        flash('Doctor approved', 'success')
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'danger')
     return redirect(url_for('admin.list_doctors'))
 
 @admin_bp.route('/doctors/<int:doctor_id>/deapprove', methods=['POST'])
 @login_required
 def deapprove_doctor(doctor_id):
     if current_user.role != 'admin': abort(403)
-    doctor = Doctor.query.get_or_404(doctor_id)
-    doctor.user.is_active = False
-    db.session.commit()
-    flash(f'Doctor {doctor.user.full_name} deactivated', 'warning')
+    try:
+        AdminService.deapprove_doctor(doctor_id)
+        flash('Doctor deactivated', 'warning')
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'danger')
     return redirect(url_for('admin.list_doctors'))
 
 @admin_bp.route('/users')
@@ -195,15 +217,17 @@ def list_users():
 @login_required
 def toggle_user_status(user_id):
     if current_user.role != 'admin': abort(403)
-    user = User.query.get_or_404(user_id)
-    if user.id == current_user.id:
+    if user_id == current_user.id:
         flash('You cannot deactivate yourself!', 'danger')
         return redirect(url_for('admin.list_users'))
     
-    user.is_active = not user.is_active
-    db.session.commit()
-    status = "activated" if user.is_active else "deactivated"
-    flash(f'User {user.username} {status}', 'success')
+    try:
+        user = User.query.get_or_404(user_id)
+        AdminService.toggle_user_status(user_id, not user.is_active)
+        status = "toggled"
+        flash(f'User status updated', 'success')
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'danger')
     return redirect(url_for('admin.list_users'))
 
 @admin_bp.route('/users/<int:user_id>/delete', methods=['POST'])
@@ -214,7 +238,11 @@ def delete_user(user_id):
     if user.id == current_user.id:
         flash('You cannot delete yourself!', 'danger')
         return redirect(url_for('admin.list_users'))
-    db.session.delete(user)
-    db.session.commit()
-    flash('User deleted successfully', 'info')
+    try:
+        db.session.delete(user)
+        db.session.commit()
+        flash('User deleted successfully', 'info')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error: {str(e)}', 'danger')
     return redirect(url_for('admin.list_users'))

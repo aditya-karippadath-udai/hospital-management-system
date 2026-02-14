@@ -39,6 +39,11 @@ def create_app(config_name=None):
     # Register error handlers
     register_error_handlers(app)
     
+    @app.teardown_request
+    def shutdown_session(exception=None):
+        if exception:
+            db.session.rollback()
+    
     # Run seeding logic within app context
     with app.app_context():
         from app.utils.seed import seed_admin

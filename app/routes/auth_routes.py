@@ -43,17 +43,21 @@ def login():
             flash('Email and password are required', 'danger')
             return render_template('auth/login.html')
 
-        user = AuthService.login_user(email, password)
+        # Support for both admin username and email-based login
+        if email == 'admin':
+            user = AuthService.login_admin(email, password)
+        else:
+            user = AuthService.login_user(email, password)
         
         if not user:
             if request.is_json:
-                return jsonify({'error': 'Invalid email or password'}), 401
-            flash('Invalid email or password', 'danger')
+                return jsonify({'error': 'Invalid credentials'}), 401
+            flash('Invalid email/username or password', 'danger')
             return render_template('auth/login.html')
 
         # Use Flask-Login to manage session
         login_user(user, remember=request.form.get('remember', False))
-        print(f"DEBUG: User {user.email} logged in successfully with role: {user.role}")
+        print(f"DEBUG: User {user.username or user.email} logged in successfully with role: {user.role}")
 
         if request.is_json:
             return jsonify({
@@ -61,13 +65,13 @@ def login():
                 'user': user.to_dict()
             }), 200
 
-        # Strict redirection based on role
-        if user.role == 'doctor': 
-            return redirect(url_for('doctor.dashboard'))
-        elif user.role == 'patient': 
-            return redirect(url_for('patient.dashboard'))
-        elif user.role == 'admin':
+        # Redirect based on user role
+        if user.role == 'admin':
             return redirect(url_for('admin.dashboard'))
+        elif user.role == 'doctor':
+            return redirect(url_for('doctor.dashboard'))
+        elif user.role == 'patient':
+            return redirect(url_for('patient.dashboard'))
         
         return redirect(url_for('auth.login'))
 

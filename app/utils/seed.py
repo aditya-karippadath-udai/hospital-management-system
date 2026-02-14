@@ -7,29 +7,34 @@ from datetime import date, timedelta
 def seed_admin():
     """Seed default admin user if not exists using professional transaction handling"""
     try:
-        # Check if an admin already exists by username OR email
-        admin = User.query.filter(
-            or_(User.email == 'admin@hms.com', User.username == 'admin')
-        ).first()
+        # Check if an admin already exists by username
+        admin = User.query.filter_by(username='admin').first()
         
         if not admin:
             # Create the default admin account
             admin = User(
-                email='admin@hms.com',
                 username='admin',
                 first_name='System',
                 last_name='Administrator',
                 role='admin',
-                is_active=True
+                is_active=True,
+                email=None  # Admin doesn't require email
             )
-            # Ensure password is hashed properly using the model's method
+            # Ensure password is hashed properly
             admin.set_password('1234')
             
             db.session.add(admin)
             db.session.commit()
             print("SUCCESS: Default admin user 'admin' created.")
         else:
-            print("INFO: Default admin user already exists. Skipping insertion.")
+            # Ensure the existing admin has the correct role and is active
+            if admin.role != 'admin' or not admin.is_active:
+                admin.role = 'admin'
+                admin.is_active = True
+                db.session.commit()
+                print("SUCCESS: Existing admin user 'admin' corrected.")
+            else:
+                print("INFO: Default admin user already exists and is correct.")
             
     except Exception as e:
         # Clean up the session state on failure

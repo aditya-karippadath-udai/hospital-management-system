@@ -35,8 +35,9 @@
                     <td>
                         <div class="d-flex align-items-center gap-2">
                             <div class="progress flex-grow-1" style="height: 6px; min-width: 100px;">
+                                {% set med_width = med.stock_quantity if med.stock_quantity <= 100 else 100 %}
                                 <div class="progress-bar {% if med.stock_quantity < 10 %}bg-danger{% elif med.stock_quantity < 30 %}bg-warning{% else %}bg-success{% endif %}" 
-                                     style="width: {{ med.stock_quantity if med.stock_quantity <= 100 else 100 }}%;"></div>
+                                     style="width: {{ med_width }}%;"></div>
                             </div>
                             <span class="small fw-bold">{{ med.stock_quantity }}</span>
                         </div>

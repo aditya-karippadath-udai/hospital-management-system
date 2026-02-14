@@ -34,6 +34,18 @@ class DoctorService:
         return Doctor.query.get(doctor_id)
 
     @staticmethod
+    def _parse_time(time_str):
+        """Helper to parse time string safely"""
+        if not time_str: return None
+        for fmt in ('%H:%M:%S', '%H:%M'):
+            try:
+                return datetime.strptime(time_str, fmt).time()
+            except ValueError:
+                continue
+        # Fallback or raise
+        raise ValueError(f"Invalid time format: {time_str}")
+
+    @staticmethod
     def update_availability(doctor_id, data):
         """Update doctor's availability and consulting hours with safety"""
         try:
@@ -43,10 +55,14 @@ class DoctorService:
                 
             if 'available_days' in data:
                 doctor.available_days = data['available_days']
-            if 'available_time_start' in data:
-                doctor.available_time_start = datetime.strptime(data['available_time_start'], '%H:%M').time()
-            if 'available_time_end' in data:
-                doctor.available_time_end = datetime.strptime(data['available_time_end'], '%H:%M').time()
+            
+            # Use safe parsing helper
+            if 'available_time_start' in data and data['available_time_start']:
+                doctor.available_time_start = DoctorService._parse_time(data['available_time_start'])
+                
+            if 'available_time_end' in data and data['available_time_end']:
+                doctor.available_time_end = DoctorService._parse_time(data['available_time_end'])
+                
             if 'consultation_fee' in data:
                 doctor.consultation_fee = data['consultation_fee']
             if 'is_available' in data:
