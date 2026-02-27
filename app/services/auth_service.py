@@ -21,7 +21,7 @@ class AuthService:
             )
             user.set_password(data['password'])
             db.session.add(user)
-            user.flush()  # Get user.id without committing
+            db.session.flush()  # Get user.id without committing
             
             # Create profile based on role
             if user.role == 'doctor':

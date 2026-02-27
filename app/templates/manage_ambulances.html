@@ -1,50 +1,68 @@
-{% extends "base_admin.html" %}
+{% extends "base.html" %}
 
-{% block title %}Ambulance Fleet{% endblock %}
+{% block title %}Ambulance Fleet Control{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-md-12 d-flex justify-content-between align-items-center">
-        <div>
-            <h2 class="fw-bold">Ambulance Fleet</h2>
-            <p class="text-muted">Manage emergency vehicles and driver assignments.</p>
-        </div>
-        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addAmbulanceModal">
-            <i class="fas fa-plus me-1"></i> Add Vehicle
-        </button>
+<div class="d-flex justify-content-between align-items-center mb-4 pb-2">
+    <div>
+        <h2 class="fw-800 text-dark mb-1">Emergency Logistics</h2>
+        <p class="text-muted small mb-0">Manage rapid response vehicles and driver assignments</p>
     </div>
+    <button class="btn btn-primary d-flex align-items-center gap-2 px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#addAmbulanceModal">
+        <i class="bi bi-plus-circle-dotted h5 mb-0"></i> 
+        <span>Register Vehicle</span>
+    </button>
 </div>
 
 <div class="row g-4">
     {% if ambulances %}
         {% for amb in ambulances %}
-        <div class="col-md-4">
-            <div class="card h-100 border-top border-4 {% if amb.is_available %}border-success{% else %}border-danger{% endif %} shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
+        <div class="col-xl-4 col-md-6">
+            <div class="card h-100 border-0 shadow-sm hover-lift overflow-hidden">
+                <div class="p-1 {% if amb.is_available %}bg-success{% else %}bg-danger{% endif %} opacity-75"></div>
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
                         <div>
-                            <h5 class="fw-bold mb-0">{{ amb.vehicle_number }}</h5>
-                            <small class="text-muted">ID: #{{ amb.id }}</small>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <h5 class="fw-bold text-dark mb-0">{{ amb.vehicle_number }}</h5>
+                                {% if amb.is_available %}
+                                    <span class="pulse-indicator bg-success"></span>
+                                {% else %}
+                                    <span class="pulse-indicator bg-danger"></span>
+                                {% endif %}
+                            </div>
+                            <small class="text-muted fw-semibold">Unit ID: #{{ amb.id }}</small>
                         </div>
-                        <div class="fs-2 {% if amb.is_available %}text-success{% else %}text-danger{% endif %}">
-                            <i class="fas fa-ambulance"></i>
+                        <div class="avatar-md bg-soft-primary text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                            <i class="bi bi-ambulance h4 mb-0"></i>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <small class="text-muted d-block fw-bold text-uppercase small">Driver</small>
-                        <span class="fw-medium">{{ amb.driver_name or 'Not Assigned' }}</span>
+
+                    <div class="bg-light rounded-4 p-3 mb-4">
+                        <div class="row items-center">
+                            <div class="col-6 border-end">
+                                <label class="uppercase-label text-muted d-block" style="font-size: 0.6rem;">Dedicated Driver</label>
+                                <span class="fw-bold text-dark small">{{ amb.driver_name or 'PENDING ASSIGNMENT' }}</span>
+                            </div>
+                            <div class="col-6 ps-3">
+                                <label class="uppercase-label text-muted d-block" style="font-size: 0.6rem;">Mission Status</label>
+                                <span class="small fw-800 {% if amb.is_available %}text-success{% else %}text-danger{% endif %}">
+                                    {{ 'READY' if amb.is_available else 'ON MISSION' }}
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge rounded-pill {% if amb.is_available %}bg-success{% else %}bg-danger{% endif %} px-3 py-2">
-                            {{ 'Available' if amb.is_available else 'Busy / On Call' }}
-                        </span>
-                    </div>
-                    <div class="d-grid gap-2">
-                        <form action="{{ url_for('admin.toggle_ambulance_status', ambulance_id=amb.id) }}" method="POST">
-                            <button type="submit" class="btn btn-sm btn-outline-secondary w-100">Toggle Status</button>
+
+                    <div class="d-flex gap-2">
+                        <form action="{{ url_for('admin.toggle_ambulance_status', ambulance_id=amb.id) }}" method="POST" class="flex-grow-1">
+                            <button type="submit" class="btn btn-outline-primary w-100 btn-sm fw-bold">
+                                Update Status
+                            </button>
                         </form>
-                        <form action="{{ url_for('admin.delete_ambulance', ambulance_id=amb.id) }}" method="POST" onsubmit="return confirm('Remove vehicle?')">
-                            <button type="submit" class="btn btn-sm btn-link text-danger w-100 mt-1">Delete Vehicle</button>
+                        <form action="{{ url_for('admin.delete_ambulance', ambulance_id=amb.id) }}" method="POST" onsubmit="return confirm('Retire this vehicle from the active fleet?')">
+                            <button type="submit" class="btn btn-outline-danger btn-sm px-3">
+                                <i class="bi bi-trash3"></i>
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -53,36 +71,58 @@
         {% endfor %}
     {% else %}
         <div class="col-12 text-center py-5">
-            <p class="text-muted">No ambulances in the fleet. Please add one.</p>
+            <div class="bg-white rounded-4 p-5 shadow-sm border border-dashed">
+                <i class="bi bi-car-front h1 text-muted opacity-25 d-block mb-3"></i>
+                <p class="text-muted fw-medium">The emergency fleet is currently empty. Initialize a vehicle to begin tracking.</p>
+            </div>
         </div>
     {% endif %}
 </div>
 
 <!-- Add Ambulance Modal -->
 <div class="modal fade" id="addAmbulanceModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 1.25rem;">
             <form action="{{ url_for('admin.manage_ambulances') }}" method="POST">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold">Register Ambulance</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-header border-0 pb-0 px-4 pt-4">
+                    <h5 class="modal-title fw-800 text-dark">Fleet Entry</h5>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Vehicle Number</label>
-                        <input type="text" name="vehicle_number" class="form-control" placeholder="e.g. AMB-7890" required>
+                <div class="modal-body p-4">
+                    <div class="mb-4">
+                        <label class="form-label uppercase-label text-muted small">Vehicle Registration Number</label>
+                        <input type="text" name="vehicle_number" class="form-control form-control-lg bg-light border-0" placeholder="e.g. AMB-2024-XP" required>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Driver Name</label>
-                        <input type="text" name="driver_name" class="form-control" placeholder="Full Name" required>
+                    <div class="mb-2">
+                        <label class="form-label uppercase-label text-muted small">Assigned Primary Driver</label>
+                        <input type="text" name="driver_name" class="form-control form-control-lg bg-light border-0" placeholder="Enter Full Name" required>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-success">Save Vehicle</button>
+                <div class="modal-footer border-0 p-4 pt-2">
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Dismiss</button>
+                    <button type="submit" class="btn btn-primary px-4 shadow-sm">Confirm Entry</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<style>
+    .hover-lift {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px -5px rgba(15, 118, 110, 0.1) !important;
+    }
+    .pulse-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+    .bg-soft-primary {
+        background-color: var(--soft-primary);
+    }
+</style>
 {% endblock %}

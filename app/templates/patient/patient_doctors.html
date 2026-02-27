@@ -11,21 +11,26 @@
 </div>
 
 <!-- Filter Section -->
-<div class="card p-3 mb-4 border-0">
+<div class="card p-4 mb-4 border-0 shadow-sm bg-white">
     <form action="{{ url_for('patient.list_doctors') }}" method="GET" class="row g-3 align-items-end">
-        <div class="col-md-5">
-            <label class="form-label small fw-bold">Specialization</label>
-            <select name="specialization" class="form-select bg-light border-0">
-                <option value="">All Specializations</option>
-                <option value="Cardiology">Cardiology</option>
-                <option value="Neurology">Neurology</option>
-                <option value="Orthopedics">Orthopedics</option>
-                <option value="Pediatrics">Pediatrics</option>
-                <option value="Dermatology">Dermatology</option>
-            </select>
+        <div class="col-md-9">
+            <label class="uppercase-label mb-2 d-block text-muted">Filter by Medical Specialization</label>
+            <div class="input-group border rounded shadow-sm">
+                <span class="input-group-text bg-white border-0 text-primary"><i class="bi bi-search"></i></span>
+                <select name="specialization" class="form-select border-0 shadow-none">
+                    <option value="">All Departments</option>
+                    <option value="Cardiology">Cardiology</option>
+                    <option value="Neurology">Neurology</option>
+                    <option value="Orthopedics">Orthopedics</option>
+                    <option value="Pediatrics">Pediatrics</option>
+                    <option value="Dermatology">Dermatology</option>
+                </select>
+            </div>
         </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-primary w-100">Filter</button>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary w-100 shadow-sm py-2">
+                Apply Search
+            </button>
         </div>
     </form>
 </div>
@@ -34,40 +39,58 @@
     {% if doctors %}
         {% for doctor in doctors %}
         <div class="col-md-6 col-lg-4">
-            <div class="card h-100 p-3 border-0">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div class="bg-soft-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                        <i class="bi bi-person-badge h4 mb-0"></i>
+            <div class="card h-100 border-0 shadow-sm overflow-visible">
+                <div class="p-4">
+                    <div class="d-flex align-items-start justify-content-between mb-3">
+                        <div class="avatar-lg bg-soft-primary rounded-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+                            <i class="bi bi-person-badge h2 mb-0 text-primary"></i>
+                        </div>
+                        <span class="badge bg-soft-primary text-primary px-3 py-2 fw-bold">{{ doctor.specialization }}</span>
                     </div>
-                    <div>
-                        <h5 class="fw-bold mb-0">Dr. {{ doctor.user.first_name }} {{ doctor.user.last_name }}</h5>
-                        <span class="badge bg-soft-primary text-primary x-small">{{ doctor.specialization }}</span>
+                    
+                    <h5 class="fw-bold text-dark mb-1">Dr. {{ doctor.user.first_name }} {{ doctor.user.last_name }}</h5>
+                    <p class="text-muted small mb-3"><i class="bi bi-award me-1"></i> Board Certified Specialist</p>
+                    
+                    <div class="bg-light rounded-3 p-3 mb-4">
+                        <div class="d-flex justify-content-between mb-2 x-small">
+                            <span class="text-muted fw-semibold">Consultation Fee</span>
+                            <span class="fw-bold text-dark">{{ doctor.consultation_fee | currency_inr if doctor.consultation_fee else 'N/A' }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between x-small">
+                            <span class="text-muted fw-semibold">Availability</span>
+                            <span class="fw-bold text-primary">{{ doctor.available_time_start }} - {{ doctor.available_time_end }}</span>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="mb-4 small text-muted">
-                    <div class="mb-1"><i class="bi bi-award me-2"></i> License: {{ doctor.license_number }}</div>
-                    <div class="mb-1"><i class="bi bi-cash-stack me-2"></i> Consultation Fee: <strong>${{ doctor.consultation_fee or 'N/A' }}</strong></div>
-                    <div><i class="bi bi-clock me-2"></i> {{ doctor.available_time_start }} - {{ doctor.available_time_end }}</div>
-                </div>
-                
-                <div class="mt-auto pt-3 border-top">
-                    {% if doctor.is_available %}
-                        <a href="{{ url_for('patient.book_appointment', doctor_id=doctor.id) }}" class="btn btn-sm btn-primary w-100">
-                            Book Appointment
-                        </a>
-                    {% else %}
-                        <button class="btn btn-sm btn-light w-100 disabled" disabled>Currently Unavailable</button>
-                    {% endif %}
+                    
+                    <div class="d-grid pt-2">
+                        {% if doctor.is_available %}
+                            <a href="{{ url_for('patient.book_appointment', doctor_id=doctor.id) }}" class="btn btn-primary shadow-sm">
+                                <i class="bi bi-calendar-plus me-2"></i> Book Appointment
+                            </a>
+                        {% else %}
+                            <button class="btn btn-light disabled border" disabled>
+                                <i class="bi bi-clock me-2"></i> Currently Offline
+                            </button>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
         {% endfor %}
     {% else %}
         <div class="col-12 text-center py-5">
-            <i class="bi bi-search d-block h1 text-muted mb-3"></i>
-            <p class="text-muted">No doctors found matching your criteria.</p>
+            <div class="stat-card-icon bg-soft-dark mx-auto mb-3" style="width: 80px; height: 80px;">
+                <i class="bi bi-search text-muted h1 mb-0"></i>
+            </div>
+            <h5 class="fw-bold text-dark">No Doctors Found</h5>
+            <p class="text-muted">Try adjusting your filters or specialization criteria.</p>
         </div>
     {% endif %}
 </div>
+
+<style>
+    .avatar-lg { transition: transform 0.2s; }
+    .card:hover .avatar-lg { transform: scale(1.05); }
+    .x-small { font-size: 0.75rem; }
+</style>
 {% endblock %}

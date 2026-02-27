@@ -19,7 +19,7 @@
                     <div class="col-md-6">
                         <h6 class="fw-bold small uppercase text-muted mb-3">Professional Info</h6>
                         <div class="mb-2"><i class="bi bi-award me-2 text-primary"></i> <strong>License:</strong> {{ doctor.license_number }}</div>
-                        <div class="mb-2"><i class="bi bi-cash-stack me-2 text-primary"></i> <strong>Consultation Fee:</strong> ${{ doctor.consultation_fee or 'N/A' }}</div>
+                        <div class="mb-2"><i class="bi bi-cash-stack me-2 text-primary"></i> <strong>Consultation Fee:</strong> {{ doctor.consultation_fee | currency_inr if doctor.consultation_fee else 'N/A' }}</div>
                         <div><i class="bi bi-calendar3 me-2 text-primary"></i> <strong>Experience:</strong> Senior Consultant</div>
                     </div>
                     <div class="col-md-6">

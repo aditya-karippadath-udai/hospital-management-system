@@ -1,0 +1,169 @@
+/* Professional Hospital ERP Design System */
+
+:root {
+    /* Primary Teal/Green Palette */
+    --hms-primary: #0f766e;    /* Teal 700 */
+    --hms-primary-dark: #0d9488;
+    --hms-primary-light: #14b8a6;
+    --hms-accent: #10b981;     /* Emerald 500 */
+    --hms-bg: #f0fdfa;         /* Teal 50 */
+    
+    /* Neutral Palette */
+    --hms-text-dark: #1f2937;
+    --hms-text-muted: #6b7280;
+    --hms-border: #e5e7eb;
+    
+    /* Soft Status Colors */
+    --hms-soft-primary: #f0fdfa;
+    --hms-soft-success: #f0fdf4;
+    --hms-soft-warning: #fffbeb;
+    --hms-soft-danger: #fef2f2;
+    --hms-soft-info: #eff6ff;
+    
+    /* Design Tokens */
+    --hms-radius: 0.75rem;
+    --hms-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --hms-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --hms-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --hms-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Global Styles */
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--hms-bg);
+    color: var(--hms-text-dark);
+    line-height: 1.6;
+}
+
+/* Layout Components */
+.navbar {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--hms-border);
+    padding: 0.75rem 0;
+    box-shadow: var(--hms-shadow-sm);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    color: var(--hms-primary) !important;
+    font-size: 1.4rem;
+    letter-spacing: -0.025em;
+}
+
+.nav-link {
+    font-weight: 500;
+    color: var(--hms-text-muted) !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: var(--hms-radius);
+    margin: 0 0.25rem;
+    transition: var(--hms-transition);
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--hms-primary) !important;
+    background-color: var(--hms-soft-primary);
+}
+
+/* Cards & Containers */
+.card {
+    border: 1px solid var(--hms-border);
+    border-radius: var(--hms-radius);
+    box-shadow: var(--hms-shadow-sm);
+    transition: var(--hms-transition);
+    overflow: hidden;
+}
+
+.card:hover {
+    box-shadow: var(--hms-shadow);
+    transform: translateY(-2px);
+}
+
+.table-container {
+    background: #ffffff;
+    border-radius: var(--hms-radius);
+    padding: 1.5rem;
+    box-shadow: var(--hms-shadow-sm);
+    border: 1px solid var(--hms-border);
+}
+
+/* Typography Enhancements */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--hms-primary);
+    letter-spacing: -0.025em;
+}
+
+.uppercase-label {
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--hms-text-muted);
+}
+
+/* Buttons */
+.btn {
+    border-radius: 0.625rem;
+    font-weight: 600;
+    padding: 0.625rem 1.25rem;
+    transition: var(--hms-transition);
+}
+
+.btn-primary {
+    background-color: var(--hms-primary);
+    border-color: var(--hms-primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--hms-primary-dark);
+    border-color: var(--hms-primary-dark);
+    box-shadow: 0 4px 12px rgba(15, 118, 110, 0.2);
+}
+
+/* Status Badges */
+.badge {
+    padding: 0.5em 0.8em;
+    font-weight: 600;
+    border-radius: 6px;
+}
+
+.bg-soft-primary { background-color: #f0fdfa; color: #0f766e; }
+.bg-soft-success { background-color: #f0fdf4; color: #166534; }
+.bg-soft-warning { background-color: #fffbeb; color: #92400e; }
+.bg-soft-danger { background-color: #fef2f2; color: #991b1b; }
+
+/* Dashboard Specifics */
+.stat-card-icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Pharmacy Table Enhancements */
+.progress {
+    height: 0.5rem;
+    border-radius: 1rem;
+    background-color: #f3f4f6;
+}
+
+.progress-bar { border-radius: 1rem; }
+
+.table th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--hms-text-muted);
+    border-top: none;
+    padding: 1rem;
+}
+
+.table td { padding: 1rem; border-color: #f3f4f6; }
+
+@media (max-width: 768px) {
+    .container { padding-left: 1.25rem; padding-right: 1.25rem; }
+}

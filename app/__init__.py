@@ -39,6 +39,30 @@ def create_app(config_name=None):
     # Register error handlers
     register_error_handlers(app)
     
+    # Global template context
+    from datetime import datetime
+    @app.context_processor
+    def inject_now():
+        return {'now': datetime.now()}
+    
+    @app.template_filter('currency_inr')
+    def currency_inr_filter(value):
+        """Format value as INR (₹) with Indian numbering system"""
+        try:
+            if value is None: return "₹0.00"
+            amount = float(value)
+            s, temp = "%.2f" % amount, ""
+            res, k = s.split(".")
+            res = res[::-1]
+            for i in range(len(res)):
+                if i == 3 or (i > 3 and (i - 3) % 2 == 0):
+                    temp += ","
+                temp += res[i]
+            res = temp[::-1].strip(",")
+            return "₹" + res + "." + k
+        except (ValueError, TypeError):
+            return f"₹{value}"
+    
     @app.teardown_request
     def shutdown_session(exception=None):
         if exception:

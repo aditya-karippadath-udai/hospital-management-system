@@ -17,144 +17,14 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
     <!-- Custom Theme CSS -->
-    <style>
-        :root {
-            --hms-primary: #0f172a;
-            --hms-accent: #3b82f6;
-            --hms-bg: #f8fafc;
-            --hms-card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            --hms-card-hover: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--hms-bg);
-            color: #1e293b;
-            overflow-x: hidden;
-        }
-
-        .navbar {
-            background-color: white;
-            border-bottom: 1px solid #e2e8f0;
-            padding: 0.75rem 1.5rem;
-        }
-
-        .navbar-brand {
-            font-weight: 700;
-            color: var(--hms-primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .navbar-brand i {
-            color: var(--hms-accent);
-            font-size: 1.5rem;
-        }
-
-        .nav-link {
-            font-weight: 500;
-            color: #64748b;
-            padding: 0.5rem 1rem !important;
-            border-radius: 6px;
-            transition: all 0.2s;
-        }
-
-        .nav-link:hover {
-            color: var(--hms-accent);
-            background-color: #eff6ff;
-        }
-
-        .nav-link.active {
-            color: var(--hms-accent) !important;
-            background-color: #eff6ff;
-        }
-
-        .card {
-            border: none;
-            border-radius: 12px;
-            box-shadow: var(--hms-card-shadow);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--hms-card-hover);
-        }
-
-        .btn-primary {
-            background-color: var(--hms-accent);
-            border-color: var(--hms-accent);
-            font-weight: 600;
-            padding: 0.6rem 1.25rem;
-            border-radius: 8px;
-        }
-
-        .btn-primary:hover {
-            background-color: #2563eb;
-            border-color: #2563eb;
-        }
-
-        .table-container {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: var(--hms-card-shadow);
-        }
-
-        .table thead th {
-            background-color: #f1f5f9;
-            color: #475569;
-            font-weight: 600;
-            border-bottom: none;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.05em;
-        }
-
-        .alert {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-        }
-
-        .dropdown-menu {
-            border: none;
-            box-shadow: var(--hms-card-hover);
-            border-radius: 10px;
-        }
-
-        footer {
-            border-top: 1px solid #e2e8f0;
-            margin-top: 4rem;
-            padding: 2rem 0;
-            color: #64748b;
-        }
-
-        /* Dashboard Stat Cards */
-        .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .bg-soft-primary { background-color: #eff6ff; color: #3b82f6; }
-        .bg-soft-success { background-color: #f0fdf4; color: #22c55e; }
-        .bg-soft-warning { background-color: #fffbeb; color: #f59e0b; }
-        .bg-soft-danger { background-color: #fef2f2; color: #ef4444; }
-
-        {% block extra_css %}{% endblock %}
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg sticky-top">
+    <nav class="navbar navbar-expand-lg sticky-top border-bottom">
         <div class="container-fluid">
             <a class="navbar-brand" href="{{ url_for('auth.home') }}">
                 <i class="bi bi-hospital"></i> 

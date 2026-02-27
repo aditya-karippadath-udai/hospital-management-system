@@ -1,59 +1,76 @@
-{% extends "base_patient.html" %}
+{% extends "base.html" %}
 
-{% block title %}Book Appointment{% endblock %}
+{% block title %}Confirm Appointment Appointment{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-primary text-white py-3">
-                <h5 class="fw-bold mb-0">Book an Appointment</h5>
+<div class="row justify-content-center py-2">
+    <div class="col-lg-6 col-md-8">
+        <div class="card border-0 shadow-lg overflow-hidden">
+            <!-- Header Section -->
+            <div class="bg-primary px-4 py-4 text-white text-center">
+                <div class="stat-card-icon bg-white bg-opacity-20 mx-auto mb-3" style="width: 60px; height: 60px;">
+                    <i class="bi bi-calendar2-plus h3 mb-0"></i>
+                </div>
+                <h4 class="fw-bold mb-1">Appointment Request</h4>
+                <p class="mb-0 opacity-75 small text-uppercase fw-semibold" style="letter-spacing: 1px;">Clinical Consultation Booking</p>
             </div>
-            <div class="card-body p-4">
-                <div class="d-flex align-items-center mb-4 p-3 bg-light rounded shadow-sm">
-                    <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-3">
-                        <i class="fas fa-user-md fa-2x text-primary"></i>
+
+            <div class="card-body p-4 p-lg-5">
+                <!-- Doctor Context -->
+                <div class="d-flex align-items-center mb-5 p-3 rounded-4 bg-soft-primary border border-primary border-opacity-10">
+                    <div class="avatar-sm bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                        <i class="bi bi-person-badge text-primary h4 mb-0"></i>
                     </div>
                     <div>
-                        <h6 class="mb-0 text-muted small">You are booking with:</h6>
-                        <h5 class="fw-bold mb-0">Dr. {{ doctor.user.full_name }}</h5>
-                        <small class="text-primary">{{ doctor.specialization }}</small>
+                        <div class="text-muted x-small fw-bold text-uppercase">Booking with</div>
+                        <h5 class="fw-bold text-dark mb-0">Dr. {{ doctor.user.first_name }} {{ doctor.user.last_name }}</h5>
+                        <div class="text-primary small fw-semibold">{{ doctor.specialization }}</div>
                     </div>
                 </div>
 
+                <!-- Booking Form -->
                 <form method="POST">
-                    <div class="row mb-3">
+                    <div class="row g-4 mb-4">
                         <div class="col-md-6">
-                            <label for="appointment_date" class="form-label fw-bold small">Preferred Date</label>
-                            <input type="date" class="form-control" id="appointment_date" name="appointment_date" 
-                                   min="{{ today }}" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="appointment_time" class="form-label fw-bold small">Preferred Time</label>
-                            <input type="time" class="form-control" id="appointment_time" name="appointment_time" 
-                                   required>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="reason" class="form-label fw-bold small">Reason for Visit (Optional)</label>
-                        <textarea class="form-control" id="reason" name="reason" rows="3" 
-                                  placeholder="Briefly describe your symptoms or reason for the visit"></textarea>
-                    </div>
-
-                    <div class="alert alert-info border-0 bg-info bg-opacity-10 py-3 mb-4">
-                        <div class="d-flex">
-                            <i class="fas fa-info-circle me-3 mt-1 text-info"></i>
-                            <div>
-                                <p class="mb-1 small">Your appointment will be marked as <strong>Pending</strong>. You will receive a notification once the doctor approves it.</p>
-                                <p class="mb-0 small fw-bold">Consultation Fee: ${{ doctor.consultation_fee }} (Payable at clinic)</p>
+                            <label class="uppercase-label mb-2 d-block">Consultation Date</label>
+                            <div class="input-group shadow-sm border rounded">
+                                <span class="input-group-text bg-white border-0"><i class="bi bi-calendar-event"></i></span>
+                                <input type="date" class="form-control border-0" id="appointment_date" name="appointment_date" 
+                                       min="{{ today }}" required>
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <label class="uppercase-label mb-2 d-block">Preferred Time</label>
+                            <div class="input-group shadow-sm border rounded">
+                                <span class="input-group-text bg-white border-0"><i class="bi bi-clock"></i></span>
+                                <input type="time" class="form-control border-0" id="appointment_time" name="appointment_time" 
+                                       required>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="uppercase-label mb-2 d-block">Reason for Consultation</label>
+                            <textarea class="form-control shadow-sm border p-3" id="reason" name="reason" rows="3" 
+                                      placeholder="Describe your current symptoms or health concerns..."></textarea>
+                        </div>
                     </div>
 
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary py-2 fw-bold">Confirm Booking</button>
-                        <a href="{{ url_for('patient.list_doctors') }}" class="btn btn-outline-secondary">Cancel</a>
+                    <!-- Fee Advisory -->
+                    <div class="p-3 bg-light rounded-4 mb-4 d-flex gap-3 align-items-start border">
+                        <i class="bi bi-info-circle-fill text-primary mt-1"></i>
+                        <div class="small text-muted">
+                            <p class="mb-1">Appointments are subject to clinical approval. You will be notified via the dashboard pulse.</p>
+                            <p class="mb-0">Estimated Fee: <strong class="text-dark">{{ doctor.consultation_fee | currency_inr }}</strong> (Payable at the front desk)</p>
+                        </div>
+                    </div>
+
+                    <!-- Form Controls -->
+                    <div class="d-grid gap-3">
+                        <button type="submit" class="btn btn-primary btn-lg shadow-sm py-3">
+                            <i class="bi bi-calendar-check me-2"></i> Submit Request
+                        </button>
+                        <a href="{{ url_for('patient.list_doctors') }}" class="btn btn-light border-0 py-2">
+                            Return to List
+                        </a>
                     </div>
                 </form>
             </div>

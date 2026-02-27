@@ -7,40 +7,53 @@
     <div class="col-lg-6">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h1 class="h3 fw-bold mb-0">Working Hours</h1>
-                <p class="text-muted small mb-0">Set your consultation schedule</p>
+                <h1 class="h3 fw-bold mb-0 text-dark">Clinical Schedule</h1>
+                <p class="text-muted small mb-0">Configure your consulting hours and work days</p>
             </div>
         </div>
 
-        <div class="card p-4">
+        <div class="card p-4 border-0 shadow-sm">
             <form action="{{ url_for('doctor.manage_availability') }}" method="POST">
-                <div class="form-check form-switch mb-4 p-3 border rounded bg-light">
-                    <input class="form-check-input ms-0 me-3" type="checkbox" id="is_available" name="is_available" {% if doctor.is_available %}checked{% endif %}>
-                    <label class="form-check-label fw-bold" for="is_available">Available for Appointments</label>
-                    <div class="text-muted x-small mt-1 ms-5">Toggle this to immediately stop/start receiving new bookings.</div>
-                </div>
-
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label small fw-semibold">Shift Start</label>
-                        <input type="time" name="available_time_start" class="form-control bg-light border-0" value="{{ doctor.available_time_start }}" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label small fw-semibold">Shift End</label>
-                        <input type="time" name="available_time_end" class="form-control bg-light border-0" value="{{ doctor.available_time_end }}" required>
+                <!-- Availability Toggle -->
+                <div class="bg-soft-primary p-4 rounded-4 mb-4 border border-primary border-opacity-10">
+                    <div class="form-check form-switch d-flex align-items-center gap-3 ps-0">
+                        <label class="form-check-label fw-bold text-dark mb-0 flex-grow-1" for="is_available">
+                            Visible to Patients
+                            <div class="text-muted x-small fw-normal mt-1">If disabled, you won't appear in the search results.</div>
+                        </label>
+                        <input class="form-check-input ms-0" type="checkbox" id="is_available" name="is_available" 
+                               style="width: 3rem; height: 1.5rem;" {% if doctor.is_available %}checked{% endif %}>
                     </div>
                 </div>
 
+                <!-- Timing Setup -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <label class="uppercase-label mb-2 d-block text-muted small">Shift Commencement</label>
+                        <div class="input-group shadow-sm border rounded">
+                            <span class="input-group-text bg-white border-0"><i class="bi bi-clock"></i></span>
+                            <input type="time" name="available_time_start" class="form-control border-0" value="{{ doctor.available_time_start }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="uppercase-label mb-2 d-block text-muted small">Shift Conclusion</label>
+                        <div class="input-group shadow-sm border rounded">
+                            <span class="input-group-text bg-white border-0"><i class="bi bi-clock-history"></i></span>
+                            <input type="time" name="available_time_end" class="form-control border-0" value="{{ doctor.available_time_end }}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Working Days -->
                 <div class="mb-4">
-                    <label class="form-label small fw-semibold">Working Days</label>
+                    <label class="uppercase-label mb-2 d-block text-muted small">Official Working Days</label>
                     <div class="d-flex flex-wrap gap-2">
                         {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
-                        <div class="form-check border rounded px-3 py-2 cursor-pointer transition" 
-                             x-data="{ checked: {{ 'true' if day in (doctor.available_days or []) else 'false' }} }"
-                             :class="checked ? 'bg-soft-primary border-primary' : 'bg-light'">
-                            <input class="form-check-input d-none" type="checkbox" name="available_days[]" value="{{ day }}" 
-                                   id="day_{{ day }}" @change="checked = !checked" {% if day in (doctor.available_days or []) %}checked{% endif %}>
-                            <label class="form-check-label small fw-medium cursor-pointer" for="day_{{ day }}">
+                        <div class="day-selector">
+                            <input type="checkbox" name="available_days[]" value="{{ day }}" 
+                                   id="day_{{ day }}" class="d-none day-checkbox"
+                                   {% if day in (doctor.available_days or []) %}checked{% endif %}>
+                            <label for="day_{{ day }}" class="btn btn-outline-light text-dark border-1 shadow-sm px-3 py-2 small fw-semibold">
                                 {{ day[:3] }}
                             </label>
                         </div>
@@ -48,24 +61,39 @@
                     </div>
                 </div>
 
-                <div class="mb-4">
-                    <label class="form-label small fw-semibold">Consultation Fee ($)</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light border-0">$</span>
-                        <input type="number" name="consultation_fee" class="form-control bg-light border-0" value="{{ doctor.consultation_fee or 0 }}" required>
+                <!-- Consultation Fee -->
+                <div class="mb-5">
+                    <label class="uppercase-label mb-2 d-block text-muted small">Standard Consultation Fee</label>
+                    <div class="input-group shadow-sm border rounded">
+                        <span class="input-group-text bg-white border-0 text-primary fw-bold">₹</span>
+                        <input type="number" name="consultation_fee" class="form-control border-0 fw-bold" value="{{ doctor.consultation_fee or 0 }}" placeholder="0.00" required>
                     </div>
+                    <div class="text-muted x-small mt-2"><i class="bi bi-info-circle me-1"></i> This fee will be visible to patients during booking.</div>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="bi bi-save me-2"></i> Update Settings
-                </button>
+                <div class="d-grid pt-2">
+                    <button type="submit" class="btn btn-primary btn-lg shadow-sm py-3">
+                        <i class="bi bi-check2-circle me-2"></i> Commit Schedule Settings
+                    </button>
+                </div>
             </form>
         </div>
     </div>
 </div>
 
 <style>
-    .cursor-pointer { cursor: pointer; }
-    .transition { transition: all 0.2s ease-in-out; }
+    .day-checkbox:checked + label {
+        background-color: var(--primary-teal) !important;
+        border-color: var(--primary-teal) !important;
+        color: white !important;
+    }
+    .day-selector label {
+        min-width: 60px;
+        transition: all 0.2s;
+    }
+    .uppercase-label {
+        letter-spacing: 0.05em;
+        font-weight: 700;
+    }
 </style>
 {% endblock %}
