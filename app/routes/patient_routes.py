@@ -76,6 +76,7 @@ def book_appointment(doctor_id):
     
     doctor = DoctorService.get_doctor_by_id(doctor_id)
     if not doctor:
+        if request.is_json: return jsonify({'error': 'Doctor profile not found'}), 404
         flash('Doctor not found', 'danger')
         return redirect(url_for('patient.list_doctors'))
         
@@ -103,17 +104,57 @@ def book_appointment(doctor_id):
                 'reason': data.get('reason', 'General Checkup')
             })
             if request.is_json:
-                return jsonify({'message': 'Appointment booked', 'appointment': appointment.to_dict()}), 201
+                return jsonify({
+                    'status': 'success',
+                    'message': 'Appointment request submitted successfully',
+                    'appointment': appointment.to_dict()
+                }), 201
             
             flash('Appointment booked! Waiting for doctor approval.', 'success')
             return redirect(url_for('patient.my_appointments'))
+        except ValueError as ve:
+            # Handle specific validation errors
+            if request.is_json: return jsonify({'status': 'error', 'error': str(ve)}), 400
+            flash(f'Booking failed: {str(ve)}', 'warning')
         except Exception as e:
-            if request.is_json: return jsonify({'error': str(e)}), 400
-            flash(f'Booking failed: {str(e)}', 'danger')
+            # Handle unexpected system errors
+            if request.is_json: return jsonify({'status': 'error', 'error': 'System encountered an error during booking'}), 500
+            flash('Internal system error during booking. Please try again.', 'danger')
             
     return render_template('patient/book_appointment.html', 
                            doctor=doctor, 
                            today=datetime.now().strftime('%Y-%m-%d'))
+
+@patient_bp.route('/api/doctor/<int:doctor_id>/availability', methods=['GET'])
+@login_required
+def check_availability_api(doctor_id):
+    """Helper endpoint to check if doctor is available at specific date/time"""
+    date_str = request.args.get('date')
+    time_str = request.args.get('time')
+    
+    if not date_str or not time_str:
+        return jsonify({'error': 'Date and time parameters are required'}), 400
+        
+    try:
+        app_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        # Flexibly parse time
+        app_time = None
+        for fmt in ('%H:%M:%S', '%H:%M'):
+            try:
+                app_time = datetime.strptime(time_str, fmt).time()
+                break
+            except ValueError: continue
+        
+        if not app_time: raise ValueError("Invalid time format")
+
+        is_available, message = AppointmentService.is_doctor_available(doctor_id, app_date, app_time)
+        return jsonify({
+            'doctor_id': doctor_id,
+            'is_available': is_available,
+            'message': message
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
 
 @patient_bp.route('/appointments', methods=['GET'])
 @login_required

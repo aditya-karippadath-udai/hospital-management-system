@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-erp
+  namespace: hms-core
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: flask-erp
+  template:
+    metadata:
+      labels:
+        app: flask-erp
+    spec:
+      containers:
+      - name: flask-erp
+        image: hms-registry/flask-erp:prod-latest
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - configMapRef:
+            name: flask-erp-config
+        - secretRef:
+            name: flask-erp-secrets
+        resources:
+          limits:
+            memory: "2Gi"
+            cpu: "1"
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-erp
+  namespace: hms-core
+spec:
+  selector:
+    app: flask-erp
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5000
+  type: LoadBalancer

@@ -1,0 +1,122 @@
+version: '3.8'
+
+services:
+  # Flask ERP System
+  flask-erp:
+    build:
+      context: ./flask-erp
+      dockerfile: Dockerfile
+    container_name: flask_erp
+    volumes:
+      - ./flask-erp:/app
+    environment:
+      - DATABASE_URL=postgresql://user:pass@postgres:5432/hms_db
+      - REDIS_URL=redis://redis:6379/0
+      - AI_SERVICE_URL=http://ai-service:8000
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - hms-network
+
+  # FastAPI AI Service
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    container_name: ai_service
+    volumes:
+      - ./ai-service:/app
+    environment:
+      - QDRANT_URL=http://qdrant:6333
+      - REDIS_URL=redis://redis:6379/1
+      - DATABASE_URL=postgresql://user:pass@postgres:5432/hms_db
+      - LLM_API_KEY=${LLM_API_KEY}
+    ports:
+      - "8000:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+    depends_on:
+      - qdrant
+      - redis
+    networks:
+      - hms-network
+
+  # Vector Database (Qdrant)
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant_db
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - hms-network
+
+  # Celery Worker for AI Tasks
+  ai-worker:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    container_name: ai_worker
+    volumes:
+      - ./ai-service:/app
+    environment:
+      - QDRANT_URL=http://qdrant:6333
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql://user:pass@postgres:5432/hms_db
+      - LLM_API_KEY=${LLM_API_KEY}
+    command: [ "celery", "-A", "app.celery_app", "worker", "--loglevel=info" ]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+    depends_on:
+      - redis
+      - qdrant
+    networks:
+      - hms-network
+
+  # Primary Database (PostgreSQL)
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres_db
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=hms_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - hms-network
+
+  # Task Queue & Cache (Redis)
+  redis:
+    image: redis:7-alpine
+    container_name: redis_broker
+    ports:
+      - "6379:6379"
+    networks:
+      - hms-network
+
+networks:
+  hms-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  qdrant_data:

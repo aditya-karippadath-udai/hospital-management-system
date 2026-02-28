@@ -1,32 +1,139 @@
-# Byte-compiled / optimized / DLL files
+# ==============================================================================
+# HMS Monorepo .gitignore
+# Production-ready configuration for Flask ERP + FastAPI AI Microservice
+# ==============================================================================
+
+# --- Python Environment & Bytecode ---
 __pycache__/
 *.py[cod]
 *$py.class
-
-# Virtual environments
+*.so
+.Python
+env/
 venv/
 .venv/
+ENV/
+env.bak/
+venv.bak/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Environment variables
+# --- Static Analysis & Typing ---
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.ropeproject
+
+# --- Environment Secrets & Configuration ---
 .env
 .env.*
+!.env.example
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
 
-# Distribution / packaging
-build/
-dist/
-*.egg-info/
-.eggs/
-
-# IDEs / editors
-.vscode/
-.idea/
-*.sublime-project
-*.sublime-workspace
-
-# Logs and database
-*.log
+# --- Databases & Persistence ---
 *.sqlite3
+*.db
+*.sql
+*.dump
+postgresql/data/
+qdrant/storage/
+redis/data/
+dump.rdb
 
-# Mac / Windows system files
-.DS_Store
+# --- Logs & Performance ---
+*.log
+logs/
+*.audit
+celerybeat-schedule
+celerybeat.pid
+
+# --- Docker & Orchestration ---
+docker-compose.override.yml
+.dockerignore
+*.tar
+*.tar.gz
+
+# --- Testing & Coverage ---
+.pytest_cache/
+.tox/
+.coverage
+.coverage.*
+nosetests.xml
+coverage.xml
+*.cover
+htmlcov/
+.hypothesis/
+
+# --- IDEs & Editors ---
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# PyCharm / IntelliJ
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Other
+*~
+*.swp
+*.swo
+
+# --- Operating Systems ---
+# Windows
 Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# --- Infrastructure & CI/CD ---
+deploy/k8s/secrets/*
+!.github/workflows/*.yml
+
+# --- App Specific Artifacts ---
+instance/
+app/static/.webassets-cache
+app/uploads/*
+ai-service/uploads/*
+!*/uploads/.gitkeep
+ai_models/
+*.model
+*.h5
+*.onnx
+
+# --- Frontend (Future) ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.next/
+out/

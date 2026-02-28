@@ -20,8 +20,8 @@ class Doctor(db.Model):
     education = db.Column(JSON)
     certifications = db.Column(JSON)
     
-    # Availability
-    available_days = db.Column(JSON, default=list)
+    # Availability Configuration
+    available_days = db.Column(JSON, default=list) # List of day names (e.g., ["Monday", "Wednesday"])
     available_time_start = db.Column(db.Time)
     available_time_end = db.Column(db.Time)
     slot_duration = db.Column(db.Integer, default=30)

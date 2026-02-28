@@ -3,118 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}HMS{% endblock %} - Hospital Management System</title>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}Dashboard{% endblock %} | HMS Cloud ERP</title>
     
-    <!-- Google Fonts: Inter -->
+    <!-- Design System Assets -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Bootstrap 5 CSS -->
+    <!-- Framework & UI Libraries -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
-    <!-- Custom Theme CSS -->
+    <!-- Core Application Styling -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     
-    {% block extra_css %}{% endblock %}
+    {% block extra_css %}{% endblock extra_css %}
 </head>
-<body class="d-flex flex-column min-vh-100">
+<body class="bg-light d-flex flex-column min-vh-100">
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg sticky-top border-bottom">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{{ url_for('auth.home') }}">
-                <i class="bi bi-hospital"></i> 
-                HMS
+    <!-- Global Header -->
+    <header class="navbar navbar-expand-lg navbar-white bg-white sticky-top border-bottom shadow-sm py-2">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('auth.home') }}">
+                <div class="avatar-sm bg-primary rounded d-flex align-items-center justify-content-center text-white" style="width: 32px; height: 32px;">
+                    <i class="bi bi-hospital-fill"></i>
+                </div>
+                <span class="fw-800 tracking-tight text-dark h5 mb-0">HMS<span class="text-primary">PRO</span></span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainContent">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
+            
+            <div class="collapse navbar-collapse" id="mainContent">
+                <!-- Portal Navigation -->
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 py-2 py-lg-0 gap-1">
                     {% if current_user.is_authenticated %}
                         {% if current_user.role == 'admin' %}
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.list_doctors') }}"><i class="bi bi-person-badge"></i> Doctors</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.list_users') }}"><i class="bi bi-people"></i> Users</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.manage_beds') }}"><i class="bi bi-hospital-fill"></i> Beds</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.manage_medicines') }}"><i class="bi bi-capsule"></i> Medicines</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.manage_ambulances') }}"><i class="bi bi-truck-front"></i> Ambulances</a></li>
+                            <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('admin.dashboard') }}"><i class="bi bi-grid-1x2 me-2"></i>Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('admin.list_doctors') }}"><i class="bi bi-person-badge me-2"></i>Medical Staff</a></li>
+                            <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('admin.list_users') }}"><i class="bi bi-people me-2"></i>Identity Mgmt</a></li>
+                            <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('admin.manage_beds') }}"><i class="bi bi-door-closed me-2"></i>Bed Census</a></li>
+                            <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('admin.manage_medicines') }}"><i class="bi bi-capsule me-2"></i>Pharmacy</a></li>
+                            <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('admin.manage_ambulances') }}"><i class="bi bi-truck-front me-2"></i>Fleet Logistics</a></li>
                         {% elif current_user.role == 'doctor' %}
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('doctor.dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('doctor.incoming_appointments') }}"><i class="bi bi-calendar-event"></i> Appointments</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('doctor.manage_availability') }}"><i class="bi bi-clock-history"></i> Availability</a></li>
+                            <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('doctor.dashboard') }}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('doctor.incoming_appointments') }}"><i class="bi bi-calendar-check me-2"></i>Clinic Agenda</a></li>
+                            <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('doctor.manage_availability') }}"><i class="bi bi-clock-history me-2"></i>Availability</a></li>
                         {% elif current_user.role == 'patient' %}
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('patient.dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('patient.list_doctors') }}"><i class="bi bi-search"></i> Find Doctors</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('patient.my_appointments') }}"><i class="bi bi-calendar-check"></i> My Appointments</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('patient.my_prescriptions') }}"><i class="bi bi-file-earmark-medical"></i> Prescriptions</a></li>
+                            <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('patient.dashboard') }}"><i class="bi bi-window-sidebar me-2"></i>Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('patient.list_doctors') }}"><i class="bi bi-search me-2"></i>Find Care</a></li>
+                            <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('patient.my_appointments') }}"><i class="bi bi-calendar-event me-2"></i>My Visits</a></li>
+                            <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('patient.my_prescriptions') }}"><i class="bi bi-file-earmark-medical me-2"></i>E-Records</a></li>
                         {% endif %}
                     {% endif %}
                 </ul>
-                <ul class="navbar-nav ms-auto">
+
+                <!-- User Profile & Auth -->
+                <div class="navbar-nav ms-auto align-items-center gap-3">
                     {% if current_user.is_authenticated %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown">
-                                <div class="bg-soft-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                                    <i class="bi bi-person"></i>
-                                </div>
-                                {{ current_user.username }}
+                        <div class="dropdown">
+                            <a class="nav-link dropdown-toggle bg-light rounded-pill px-3 py-1 border d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
+                                <span class="avatar-xs bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 24px; height: 24px;">
+                                    <i class="bi bi-person-fill x-small"></i>
+                                </span>
+                                <span class="small fw-bold text-dark">{{ current_user.username }}</span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow">
-                                <li><a class="dropdown-item" href="#"><i class="bi bi-person-gear"></i> Profile</a></li>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3 p-2" style="border-radius: 1rem;">
+                                <li><a class="dropdown-item rounded-3 py-2" href="#"><i class="bi bi-shield-lock me-2"></i>Privacy Settings</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                                <li><a class="dropdown-item rounded-3 py-2 text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-power me-2"></i>Terminate Session</a></li>
                             </ul>
-                        </li>
+                        </div>
                     {% else %}
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Login</a></li>
-                        <li class="nav-item"><a class="btn btn-primary ms-lg-3" href="{{ url_for('auth.register') }}">Register</a></li>
+                        <a href="{{ url_for('auth.login') }}" class="nav-link fw-bold text-dark px-3">Sign In</a>
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">Get Started</a>
                     {% endif %}
-                </ul>
+                </div>
             </div>
         </div>
-    </nav>
+    </header>
 
-    <!-- Content Area -->
-    <main class="container py-4">
-        <!-- Flash Messages -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show mb-4" role="alert">
-                        {% if category == 'success' %}<i class="bi bi-check-circle-fill me-2"></i>{% endif %}
-                        {% if category == 'danger' %}<i class="bi bi-exclamation-triangle-fill me-2"></i>{% endif %}
-                        {% if category == 'warning' %}<i class="bi bi-exclamation-circle-fill me-2"></i>{% endif %}
-                        {% if category == 'info' %}<i class="bi bi-info-circle-fill me-2"></i>{% endif %}
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <!-- Main Content Application Node -->
+    <main class="flex-grow-1">
+        <div class="container-fluid px-4 py-4">
+            <!-- Systems Messages (Flash Notifications) -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                        {% for category, message in messages %}
+                            <div class="toast show border-0 shadow-lg mb-3" role="alert" aria-live="assertive" aria-atomic="true" style="border-radius: 1rem;">
+                                <div class="toast-header border-0 bg-transparent py-3">
+                                    <div class="badge bg-{{ category }} p-2 me-2">
+                                        <i class="bi bi-info-circle-fill"></i>
+                                    </div>
+                                    <strong class="me-auto text-dark uppercase-label">System Notification</strong>
+                                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="toast"></button>
+                                </div>
+                                <div class="toast-body pt-0 pb-4 px-4 text-muted small">
+                                    {{ message }}
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+                {% endif %}
+            {% endwith %}
 
-        {% block content %}{% endblock %}
+            <!-- Dynamic Template Block -->
+            {% block content %}{% endblock content %}
+        </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="container text-center">
-        <p class="mb-0">&copy; 2024 Hospital Management System. All rights reserved.</p>
-        <div class="mt-2">
-            <a href="#" class="text-decoration-none me-3"><i class="bi bi-github"></i> Repository</a>
-            <a href="#" class="text-decoration-none"><i class="bi bi-envelope"></i> Support</a>
+    <!-- Global Footer -->
+    <footer class="bg-white border-top py-4 mt-auto">
+        <div class="container-fluid px-4">
+            <div class="row align-items-center g-3">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="mb-0 text-muted small">&copy; 2024 <span class="fw-bold">HMS Cloud ERP Operations</span>. Enterprise Edition v2.1</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <div class="d-flex justify-content-center justify-content-md-end gap-3">
+                        <a href="#" class="text-muted text-decoration-none small hover-link">Documentation</a>
+                        <a href="#" class="text-muted text-decoration-none small hover-link">Privacy Policy</a>
+                        <a href="#" class="text-muted text-decoration-none small hover-link">Cloud Status</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </footer>
 
-    <!-- Bootstrap 5 JS Bundle -->
+    <!-- Scripts Architecture -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Alpine.js (for simple interactions if needed) -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    {% block extra_js %}{% endblock extra_js %}
 
-    {% block extra_js %}{% endblock %}
+    <style>
+        .hover-link:hover { color: var(--primary-teal) !important; }
+    </style>
 </body>
 </html>
