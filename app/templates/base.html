@@ -56,7 +56,14 @@
                             <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('patient.list_doctors') }}"><i class="bi bi-search me-2"></i>Find Care</a></li>
                             <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('patient.my_appointments') }}"><i class="bi bi-calendar-event me-2"></i>My Visits</a></li>
                             <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('patient.my_prescriptions') }}"><i class="bi bi-file-earmark-medical me-2"></i>E-Records</a></li>
+                            <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('patient.my_prescriptions') }}"><i class="bi bi-file-earmark-medical me-2"></i>E-Records</a></li>
                         {% endif %}
+                        <!-- Global AI Assistant Access -->
+                        <li class="nav-item">
+                            <a class="nav-link px-3 text-primary fw-bold" href="{{ url_for('ai.chatbot') }}">
+                                <i class="bi bi-robot me-2"></i>AI Assistant
+                            </a>
+                        </li>
                     {% endif %}
                 </ul>
 
@@ -139,8 +146,17 @@
     
     {% block extra_js %}{% endblock extra_js %}
 
+    {% if current_user.is_authenticated %}
+    <!-- Floating AI Assistant Button -->
+    <a href="{{ url_for('ai.chatbot') }}" class="btn btn-primary rounded-circle shadow-lg position-fixed d-flex align-items-center justify-content-center" 
+       style="bottom: 30px; right: 30px; width: 60px; height: 60px; z-index: 1050; border: 4px solid white;">
+        <i class="bi bi-chat-dots-fill h3 mb-0"></i>
+    </a>
+    {% endif %}
+
     <style>
         .hover-link:hover { color: var(--primary-teal) !important; }
+        .nav-link:hover { background-color: rgba(59, 130, 246, 0.05); border-radius: 8px; }
     </style>
 </body>
 </html>

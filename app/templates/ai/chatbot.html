@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card shadow-lg border-0" style="border-radius: 15px; overflow: hidden;">
+                <!-- Header -->
+                <div class="card-header bg-primary text-white py-3 d-flex align-items-center">
+                    <div class="rounded-circle bg-white text-primary p-2 me-3" style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-robot fa-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0">AI Medical Assistant</h4>
+                        <small class="opacity-75">Grounded Clinical Knowledge</small>
+                    </div>
+                </div>
+
+                <!-- Chat Body -->
+                <div class="card-body bg-light overflow-auto" id="chat-window" style="height: 500px; scroll-behavior: smooth;">
+                    <!-- Welcome Message -->
+                    <div class="d-flex mb-4">
+                        <div class="bg-white p-3 rounded-right shadow-sm text-dark" style="max-width: 80%; border-radius: 0 15px 15px 15px;">
+                            <p class="mb-0">Hello! I am your AI Clinical Assistant. How can I help you today?</p>
+                            <small class="text-muted mt-2 d-block"><i class="fas fa-shield-alt me-1"></i> Responses are grounded in hospital SOPs and clinical guidelines.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="card-footer bg-white border-top-0 p-3">
+                    <form id="chat-form" class="d-flex gap-2">
+                        <input type="text" id="user-input" class="form-control border-0 bg-light py-2 px-3" placeholder="Type your medical query here..." required style="border-radius: 25px;">
+                        <button type="submit" class="btn btn-primary d-flex align-items-center justify-content-center" style="width: 45px; height: 45px; border-radius: 50%;">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                    <div class="mt-2 text-center text-muted" style="font-size: 0.75rem;">
+                        <i class="fas fa-exclamation-triangle me-1"></i> For informational purposes only. In case of emergency, call 911 immediately.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const chatWindow = document.getElementById('chat-window');
+    const chatForm = document.getElementById('chat-form');
+    const userInput = document.getElementById('user-input');
+
+    function appendMessage(role, text, status = 'success') {
+        const div = document.createElement('div');
+        div.className = role === 'user' ? 'd-flex justify-content-end mb-4' : 'd-flex mb-4';
+        
+        const bgColor = role === 'user' ? 'bg-primary text-white' : 'bg-white text-dark';
+        const borderRadius = role === 'user' ? '15px 15px 0 15px' : '0 15px 15px 15px';
+        
+        div.innerHTML = `
+            <div class="${bgColor} p-3 shadow-sm" style="max-width: 80%; border-radius: ${borderRadius};">
+                <p class="mb-0">${text}</p>
+                ${status === 'emergency' ? '<div class="alert alert-danger mt-2 mb-0 py-1"><i class="fas fa-phone-alt me-2"></i><strong>URGENT:</strong> Seek ER care now.</div>' : ''}
+            </div>
+        `;
+        chatWindow.appendChild(div);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const query = userInput.value.trim();
+        if (!query) return;
+
+        appendMessage('user', query);
+        userInput.value = '';
+
+        // Add loading indicator
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'd-flex mb-4';
+        loadingDiv.innerHTML = '<div class="bg-white p-3 shadow-sm" style="border-radius: 0 15px 15px 15px;"><i class="fas fa-spinner fa-spin me-2"></i> Analyzing clinical data...</div>';
+        chatWindow.appendChild(loadingDiv);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+
+        try {
+            const response = await fetch('/ai/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: query })
+            });
+            
+            const data = await response.json();
+            chatWindow.removeChild(loadingDiv);
+
+            if (data.status === 'EMERGENCY_OVERRIDE') {
+                appendMessage('ai', data.response, 'emergency');
+            } else if (data.response) {
+                appendMessage('ai', data.response);
+            } else {
+                appendMessage('ai', "I'm sorry, I couldn't process that. Please try again or consult your doctor.", 'error');
+            }
+        } catch (err) {
+            chatWindow.removeChild(loadingDiv);
+            appendMessage('ai', "Connection issue. Please check your network.", 'error');
+        }
+    });
+</script>
+{% endblock %}

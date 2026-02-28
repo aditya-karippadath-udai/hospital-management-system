@@ -88,12 +88,14 @@ def register_blueprints(app):
     from app.routes.doctor_routes import doctor_bp
     from app.routes.patient_routes import patient_bp
     from app.routes.appointment_routes import appointment_bp
+    from app.routes.ai_routes import ai_bp
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(doctor_bp, url_prefix='/doctor')
     app.register_blueprint(patient_bp, url_prefix='/patient')
     app.register_blueprint(appointment_bp, url_prefix='/appointments')
+    app.register_blueprint(ai_bp, url_prefix='/ai')
 
 
 def register_error_handlers(app):
