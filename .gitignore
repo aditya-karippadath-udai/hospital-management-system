@@ -137,3 +137,4 @@ yarn-debug.log*
 yarn-error.log*
 .next/
 out/
+ai-service/Lama/llama
